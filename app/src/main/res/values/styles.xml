@@ -5,7 +5,15 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorDeepBlue</item>
     </style>
-
+    <style name="custom_text">
+        <item name="android:textSize">45sp</item>
+        <item name="android:textColor">@color/colorDeepBlue</item>
+    </style>
+    <style name="custom_button">
+        <item name="android:background">@drawable/shape_button_state</item>
+        <item name="android:bottomLeftRadius">25dp</item>
+        <item name="android:textColor">@color/colorLightGreen</item>
+    </style>
 </resources>

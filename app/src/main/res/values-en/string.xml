@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello_daniil">Hello Daniil !</string>
+    <string name="radiobutton">RadioButton</string>
+    <string name="кнопкаВперед">NEXT</string>
+    <string name="кнопкаНазад">BACK</string>
+
+    <string name="app_name">Job4j Exam</string>
+    <string name="domain_prompt">Set location</string>
+    <string name="exp_date">Date of tests</string>
+    <string name="область">Location</string>
+    <string name="имяОбъекта">Object name</string>
+    <string name="имяОб">object name</string>
+    <string name="адрес">Address</string>
+    <string name="улицаДом">street, house number</string>
+    <string name="фио">Name, Surname</string>
+    <string name="фиоЗаказчика">customer`s name</string>
+    <string name="температура">Temperature</string>
+    <string name="емператураВоздуха">air temperature</string>
+    <string name="влажность">Humidity</string>
+    <string name="влажностьВозд">air humidity</string>
+    <string name="давление">Pressure</string>
+    <string name="атмДавление">atmospheric pressure</string>
+    <string name="отчет">Report number</string>
+    <string name="номерОтчета">report number</string>
+    <string name="назад">BACK</string>
+    <string name="далее">NEXT</string>
+    <string-array name="domain_arrays">
+        <item>Moscow</item>
+        <item>St.Petersburg</item>
+        <item>Ryazan</item>
+    </string-array>
+</resources>
