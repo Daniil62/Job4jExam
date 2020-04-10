@@ -35,15 +35,18 @@ public class MainActivity extends AppCompatActivity {
     private int position = 0;
     private static final String TAG = "ExamActivity";
     private static int count = 0;
+
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_main);
+        final RadioGroup variants = findViewById(R.id.variants);
         Button next = findViewById(R.id.next);
         next.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         showAnswer();
+                        variants.clearCheck();
                         position++;
                         fillForm();
                     }
@@ -53,11 +56,19 @@ public class MainActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        variants.clearCheck();
                         position--;
                         fillForm();
                     }
-                }
-        );
+                });
+        variants.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton rb = (RadioButton) group.findViewById(checkedId);
+                findViewById(R.id.next).setEnabled(rb != null && checkedId != -1
+                        && position != questions.size() - 1);
+            }
+        });
         this.fillForm();
         Log.d(TAG, "onCreate");
     }
@@ -100,19 +111,17 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "count = " + count);
     }
     private void fillForm() {
+        RadioGroup variants = findViewById(R.id.variants);
+        findViewById(R.id.next).setEnabled(variants.isSelected());
         findViewById(R.id.previous).setEnabled(position != 0);
-        findViewById(R.id.next).setEnabled(position != questions.size() - 1);
         final TextView text = findViewById(R.id.question);
         Question question = this.questions.get(this.position);
         text.setText(question.getText());
-        RadioGroup variants = findViewById(R.id.variants);
-
         for (int i = 0; i != variants.getChildCount(); i++) {
-
-          //  RadioButton button = (RadioButton) variants.getChildAt(i);
+            RadioButton button = (RadioButton) variants.getChildAt(i);
             Option option = question.getOptions().get(i);
-         //   button.setId(option.getId());
-         //   button.setText(option.getText());
+            button.setId(option.getId());
+            button.setText(option.getText());
         }
     }
     private void showAnswer() {
