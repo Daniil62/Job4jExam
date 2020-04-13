@@ -1,11 +1,7 @@
 package ru.job4j.exam;
 
-import android.arch.lifecycle.Lifecycle;
-import android.nfc.Tag;
-import android.os.PersistableBundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,35 +33,36 @@ public class MainActivity extends AppCompatActivity {
     private static int count = 0;
 
     @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return super.onRetainCustomNonConfigurationInstance();
+    }
+    private void nextBtn(View view) {
+        ++position;
+        RadioGroup variants = findViewById(R.id.variants);
+        showAnswer();
+        variants.clearCheck();
+        fillForm();
+    }
+    private void prevButton(View view) {
+        RadioGroup variants = findViewById(R.id.variants);
+        variants.clearCheck();
+        position--;
+        fillForm();
+    }
+    @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_main);
-        final RadioGroup variants = findViewById(R.id.variants);
         Button next = findViewById(R.id.next);
-        next.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        showAnswer();
-                        variants.clearCheck();
-                        position++;
-                        fillForm();
-                    }
-                });
+        next.setOnClickListener(this::nextBtn);
         Button previous = findViewById(R.id.previous);
-        previous.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        variants.clearCheck();
-                        position--;
-                        fillForm();
-                    }
-                });
+        previous.setOnClickListener(this::prevButton);
+        RadioGroup variants = findViewById(R.id.variants);
         variants.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                RadioButton rb = (RadioButton) group.findViewById(checkedId);
-                findViewById(R.id.next).setEnabled(rb != null && checkedId != -1
+                RadioButton rb = group.findViewById(checkedId);
+                next.setEnabled(rb != null && checkedId != -1
                         && position != questions.size() - 1);
             }
         });
@@ -100,14 +97,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        count++;
-        this.fillForm();
-        outState.putInt("Rotate count", count);
+        if (outState != null) {
+            outState.putInt("position", position);
+            outState.putBoolean("buttonNextState", findViewById(R.id.next).isEnabled());
+            count++;
+            outState.putInt("Rotate count", count);
+        }
         Log.d(TAG, "onSaveInstanceState");
     }
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        position = savedInstanceState.getInt("position");
+        this.fillForm();
+        findViewById(R.id.next).setEnabled(savedInstanceState.getBoolean("buttonNextState"));
+        Log.d(TAG, "onRestoreInstanceState");
         Log.d(TAG, "count = " + count);
     }
     private void fillForm() {
