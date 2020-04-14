@@ -7,7 +7,7 @@ public class Question {
     private String text;
     private List<Option> options;
     private int answer;
-    Question(int id, String text, List<Option> options, int answer) {
+    public Question(int id, String text, List<Option> options, int answer) {
         this.id = id;
         this.text = text;
         this.options = options;
