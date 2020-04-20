@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         RadioGroup variants = findViewById(R.id.variants);
         fillStatistic();
         if (position < store.size() - 1) {
-            saveButtons();
+            this.saveButtons();
             position++;
             variants.clearCheck();
             fillForm();
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         RadioGroup variants = findViewById(R.id.variants);
         variants.clearCheck();
         position--;
-        restoreButtons();
+        this.restoreButtons();
         statStore.remove(position);
         fillForm();
     }
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             outState.putInt("position", position);
             outState.putBoolean("buttonNextState", next.isEnabled());
             outState.putInt("Rotate count", count);
-            outState.putIntArray("radioButtons", buttonsArray);
+            outState.putIntArray("radioButtons", this.buttonsArray);
             count++;
         }
         Log.d(TAG, "onSaveInstanceState");
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         Button next = findViewById(R.id.next);
         position = savedInstanceState.getInt("position");
         fillForm();
-        buttonsArray = savedInstanceState.getIntArray("radioButtons");
+        this.buttonsArray = savedInstanceState.getIntArray("radioButtons");
         next.setEnabled(savedInstanceState.getBoolean("buttonNextState"));
         Log.d(TAG, "onRestoreInstanceState");
         Log.d(TAG, "count = " + count + " position " + position
@@ -151,11 +151,11 @@ public class MainActivity extends AppCompatActivity {
         Question question = store.get(position);
         int id = variants.getCheckedRadioButtonId();
         Option option = question.getOptions().get(id - 1);
-        buttonsArray[position] = option.getId();
+        this.buttonsArray[position] = option.getId();
     }
     private void restoreButtons() {
         RadioGroup variants = findViewById(R.id.variants);
-        variants.check(buttonsArray[position]);
+        variants.check(this.buttonsArray[position]);
     }
     private void showAnswer() {
         RadioGroup variants = findViewById(R.id.variants);
