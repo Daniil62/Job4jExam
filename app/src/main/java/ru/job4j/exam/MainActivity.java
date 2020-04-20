@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onRetainCustomNonConfigurationInstance();
     }
     private void nextBtn(View view) {
-
         RadioGroup variants = findViewById(R.id.variants);
         fillStatistic();
         if (position < store.size() - 1) {
@@ -39,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             showAnswer();
         }
         else if (position == store.size() -1) {
-            this.showAnswer();
+            showAnswer();
             Intent intent = new Intent(MainActivity.this,
                     ResultActivity.class);
             intent.putExtra(RESULT_FOR, position);
@@ -50,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         RadioGroup variants = findViewById(R.id.variants);
         variants.clearCheck();
         position--;
-        this.restoreButtons();
+        restoreButtons();
         statStore.remove(position);
         fillForm();
     }
@@ -115,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             outState.putInt("position", position);
             outState.putBoolean("buttonNextState", next.isEnabled());
             outState.putInt("Rotate count", count);
-            outState.putString("textOfButtonNext", next.getText().toString());
+            outState.putIntArray("radioButtons", buttonsArray);
             count++;
         }
         Log.d(TAG, "onSaveInstanceState");
@@ -124,9 +123,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         Button next = findViewById(R.id.next);
-        next.setText(savedInstanceState.getString("textOfButtonNext"));
         position = savedInstanceState.getInt("position");
-        this.fillForm();
+        fillForm();
+        buttonsArray = savedInstanceState.getIntArray("radioButtons");
         next.setEnabled(savedInstanceState.getBoolean("buttonNextState"));
         Log.d(TAG, "onRestoreInstanceState");
         Log.d(TAG, "count = " + count + " position " + position
@@ -138,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         next.setEnabled(variants.isSelected());
         findViewById(R.id.previous).setEnabled(position != 0);
         final TextView text = findViewById(R.id.question);
-        Question question = this.store.get(this.position);
+        Question question = store.get(position);
         text.setText(question.getText());
         for (int i = 0; i != variants.getChildCount(); i++) {
             RadioButton button = (RadioButton) variants.getChildAt(i);
@@ -149,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     }
     private void saveButtons() {
         RadioGroup variants = findViewById(R.id.variants);
-        Question question = this.store.get(this.position);
+        Question question = store.get(position);
         int id = variants.getCheckedRadioButtonId();
         Option option = question.getOptions().get(id - 1);
         buttonsArray[position] = option.getId();
@@ -161,15 +160,15 @@ public class MainActivity extends AppCompatActivity {
     private void showAnswer() {
         RadioGroup variants = findViewById(R.id.variants);
         int id = variants.getCheckedRadioButtonId();
-        Question question = this.store.get(this.position);
+        Question question = store.get(position);
         Toast.makeText(this, "Your answer is " + id
                         + ", correct is " + question.getAnswer(),
                 Toast.LENGTH_SHORT).show();
     }
     private void fillStatistic() {
         RadioGroup variants = findViewById(R.id.variants);
-        Question question = this.store.get(position);
+        Question question = store.get(position);
         int id = variants.getCheckedRadioButtonId();
-        this.statStore.add(new Statistic(id, question.getAnswer()));
+        statStore.add(new Statistic(id, question.getAnswer()));
     }
 }
