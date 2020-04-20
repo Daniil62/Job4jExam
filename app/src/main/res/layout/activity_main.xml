@@ -12,7 +12,6 @@
         android:layout_height="0dp"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="visible"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -22,11 +21,12 @@
         <TextView
             android:id="@+id/question"
             style="@style/custom_text"
+            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:text="@string/hello_daniil"
-            android:visibility="visible"
+
 
             app:layout_constraintHorizontal_bias="0.54"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -76,7 +76,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_margin="3dp"
-                    android:text="@string/кнопкаНазад" />
+                    android:text="@string/back" />
+                <Button
+                    android:id="@+id/hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/hintText" />
 
                 <Button
                     android:id="@+id/next"
@@ -84,7 +90,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_margin="3dp"
-                    android:text="@string/кнопкаВперед" />
+                    android:text="@string/next" />
             </LinearLayout>
     </LinearLayout>
 

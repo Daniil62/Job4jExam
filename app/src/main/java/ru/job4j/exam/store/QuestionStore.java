@@ -7,7 +7,6 @@ import java.util.List;
 
 public final class QuestionStore {
     private List<Question> questions = new ArrayList<Question>();
-
     private static final QuestionStore INST = new QuestionStore();
 
     private QuestionStore() {
@@ -20,9 +19,6 @@ public final class QuestionStore {
         questions.add(new Question(3, "What is happen if we try unboxing null?",
                 Arrays.asList(new Option(1, "3.1"), new Option(2, "3.2"),
                         new Option(3, "3.3"), new Option(4, "3.4")), 4));
-        questions.add(new Question(4, "The end",
-                Arrays.asList(new Option(4, ""), new Option(4, ""),
-                        new Option(4, ""), new Option(4, "")), 4));
     }
     public static QuestionStore getInstance() {
         return INST;

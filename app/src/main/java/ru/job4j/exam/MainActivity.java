@@ -1,5 +1,6 @@
 package ru.job4j.exam;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -10,28 +11,47 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import ru.job4j.exam.store.QuestionStore;
+import ru.job4j.exam.store.StatisticStore;
+import static ru.job4j.exam.HintActivity.HINT_FOR;
+import static ru.job4j.exam.ResultActivity.RESULT_FOR;
 
 public class MainActivity extends AppCompatActivity {
     private final QuestionStore store = QuestionStore.getInstance();
     private int position = 0;
     private static final String TAG = "ExamActivity";
     private static int count = 0;
+    private StatisticStore statStore = new StatisticStore();
+    private int[] buttonsArray = new int[store.size()];
 
     @Override
     public Object onRetainCustomNonConfigurationInstance() {
         return super.onRetainCustomNonConfigurationInstance();
     }
     private void nextBtn(View view) {
-        ++position;
+
         RadioGroup variants = findViewById(R.id.variants);
-        showAnswer();
-        variants.clearCheck();
-        fillForm();
+        fillStatistic();
+        if (position < store.size() - 1) {
+            saveButtons();
+            position++;
+            variants.clearCheck();
+            fillForm();
+            showAnswer();
+        }
+        else if (position == store.size() -1) {
+            this.showAnswer();
+            Intent intent = new Intent(MainActivity.this,
+                    ResultActivity.class);
+            intent.putExtra(RESULT_FOR, position);
+            startActivity(intent);
+        }
     }
     private void prevButton(View view) {
         RadioGroup variants = findViewById(R.id.variants);
         variants.clearCheck();
         position--;
+        this.restoreButtons();
+        statStore.remove(position);
         fillForm();
     }
     @Override
@@ -43,14 +63,22 @@ public class MainActivity extends AppCompatActivity {
         Button previous = findViewById(R.id.previous);
         previous.setOnClickListener(this::prevButton);
         RadioGroup variants = findViewById(R.id.variants);
-        variants.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                RadioButton rb = group.findViewById(checkedId);
-                next.setEnabled(rb != null && checkedId != -1
-                        && position != store.size() - 1);
-            }
+        variants.setOnCheckedChangeListener((group, checkedId) -> {
+            RadioButton rb = group.findViewById(checkedId);
+            next.setEnabled(rb != null && checkedId != -1);
         });
+        Button hint = findViewById(R.id.hint);
+        hint.setOnClickListener(
+                view -> startActivity(new Intent(MainActivity.this,
+                        HintActivity.class)));
+        hint.setOnClickListener(
+                view -> {
+                    Intent intent = new Intent(MainActivity.this,
+                            HintActivity.class);
+                    intent.putExtra(HINT_FOR, position);
+                    startActivity(intent);
+                }
+        );
         this.fillForm();
         Log.d(TAG, "onCreate");
     }
@@ -82,26 +110,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        Button next = findViewById(R.id.next);
         if (outState != null) {
             outState.putInt("position", position);
-            outState.putBoolean("buttonNextState", findViewById(R.id.next).isEnabled());
-            count++;
+            outState.putBoolean("buttonNextState", next.isEnabled());
             outState.putInt("Rotate count", count);
+            outState.putString("textOfButtonNext", next.getText().toString());
+            count++;
         }
         Log.d(TAG, "onSaveInstanceState");
     }
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        Button next = findViewById(R.id.next);
+        next.setText(savedInstanceState.getString("textOfButtonNext"));
         position = savedInstanceState.getInt("position");
         this.fillForm();
-        findViewById(R.id.next).setEnabled(savedInstanceState.getBoolean("buttonNextState"));
+        next.setEnabled(savedInstanceState.getBoolean("buttonNextState"));
         Log.d(TAG, "onRestoreInstanceState");
-        Log.d(TAG, "count = " + count);
+        Log.d(TAG, "count = " + count + " position " + position
+                + " static store size " + statStore.getStatistic().size());
     }
     private void fillForm() {
         RadioGroup variants = findViewById(R.id.variants);
-        findViewById(R.id.next).setEnabled(variants.isSelected());
+        Button next = findViewById(R.id.next);
+        next.setEnabled(variants.isSelected());
         findViewById(R.id.previous).setEnabled(position != 0);
         final TextView text = findViewById(R.id.question);
         Question question = this.store.get(this.position);
@@ -113,6 +147,17 @@ public class MainActivity extends AppCompatActivity {
             button.setText(option.getText());
         }
     }
+    private void saveButtons() {
+        RadioGroup variants = findViewById(R.id.variants);
+        Question question = this.store.get(this.position);
+        int id = variants.getCheckedRadioButtonId();
+        Option option = question.getOptions().get(id - 1);
+        buttonsArray[position] = option.getId();
+    }
+    private void restoreButtons() {
+        RadioGroup variants = findViewById(R.id.variants);
+        variants.check(buttonsArray[position]);
+    }
     private void showAnswer() {
         RadioGroup variants = findViewById(R.id.variants);
         int id = variants.getCheckedRadioButtonId();
@@ -120,5 +165,11 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Your answer is " + id
                         + ", correct is " + question.getAnswer(),
                 Toast.LENGTH_SHORT).show();
+    }
+    private void fillStatistic() {
+        RadioGroup variants = findViewById(R.id.variants);
+        Question question = this.store.get(position);
+        int id = variants.getCheckedRadioButtonId();
+        this.statStore.add(new Statistic(id, question.getAnswer()));
     }
 }
