@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -12,17 +15,22 @@ import java.text.MessageFormat;
 import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
-public class ResultActivity extends AppCompatActivity {
+public abstract class ResultActivity extends FragmentActivity {
     public static final String RESULT_FOR = "result_for";
     private StringBuilder sb = new StringBuilder();
     private StatisticStore statStore = new StatisticStore();
     private final QuestionStore qStore = QuestionStore.getInstance();
     private int size = statStore.getStatistic().size();
+    public abstract Fragment loadFrg();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.result_activity);
+        setContentView(R.layout.host_frg);
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.findFragmentById(R.id.content) == null) {
+            fm.beginTransaction().add(R.id.content, loadFrg()).commit();
+        }
         Button again = findViewById(R.id.try_again);
         again.setOnClickListener(new View.OnClickListener() {
             @Override

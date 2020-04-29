@@ -2,7 +2,9 @@ package ru.job4j.exam;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,13 +17,14 @@ import ru.job4j.exam.store.StatisticStore;
 import static ru.job4j.exam.HintActivity.HINT_FOR;
 import static ru.job4j.exam.ResultActivity.RESULT_FOR;
 
-public class MainActivity extends AppCompatActivity {
+public abstract class MainActivity extends FragmentActivity {
     private final QuestionStore store = QuestionStore.getInstance();
     private int position = 0;
     private static final String TAG = "ExamActivity";
     private static int count = 0;
     private StatisticStore statStore = new StatisticStore();
     private int[] buttonsArray = new int[store.size()];
+    public abstract Fragment loadFrg();
 
     @Override
     public Object onRetainCustomNonConfigurationInstance() {
@@ -56,7 +59,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.host_frg);
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.findFragmentById(R.id.content) == null) {
+            fm.beginTransaction().add(R.id.content, loadFrg()).commit();
+        }
         Button next = findViewById(R.id.next);
         next.setOnClickListener(this::nextBtn);
         Button previous = findViewById(R.id.previous);
