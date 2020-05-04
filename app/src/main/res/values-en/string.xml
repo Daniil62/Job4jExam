@@ -2,8 +2,14 @@
 <resources>
     <string name="hello_daniil">Hello Daniil !</string>
     <string name="radiobutton">RadioButton</string>
-    <string name="кнопкаВперед">NEXT</string>
-    <string name="кнопкаНазад">BACK</string>
+    <string name="next">NEXT</string>
+    <string name="back">BACK</string>
+    <string name="hintText">Hint</string>
+    <string name="questionHintText">Question</string>
+    <string name="again">AGAIN</string>
+    <string name="result">Result</string>
+    <string name="answers">Answers</string>
+    <string name="finish">Result</string>
 
     <string name="app_name">Job4j Exam</string>
     <string name="domain_prompt">Set location</string>

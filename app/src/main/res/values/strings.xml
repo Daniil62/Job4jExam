@@ -26,6 +26,12 @@
     </string-array>
     <string name="hello_daniil">Hello Daniil !</string>
     <string name="radiobutton">RadioButton</string>
-    <string name="кнопкаВперед">ВПЕРЕД</string>
-    <string name="кнопкаНазад">НАЗАД</string>
+    <string name="next">ВПЕРЕД</string>
+    <string name="back">НАЗАД</string>
+    <string name="hintText">Подсказка</string>
+    <string name="questionHintText">Вопрос</string>
+    <string name="again">ЗАНОВО</string>
+    <string name="result">Результат</string>
+    <string name="answers">Ответы</string>
+    <string name="finish">Result</string>
 </resources>
