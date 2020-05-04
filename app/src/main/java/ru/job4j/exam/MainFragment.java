@@ -24,17 +24,17 @@ public class MainFragment extends Fragment {
     private int position = 0;
     private int[] buttonsArray = new int[store.size()];
     private void nextBtn(View view) {
-        RadioGroup variants = Objects.requireNonNull(getActivity()).findViewById(R.id.variants);
-        fillStatistic();
+        RadioGroup variants = view.findViewById(R.id.variants);
+        fillStatistic(view);
         if (position < store.size() - 1) {
-            this.saveButtons();
+            this.saveButtons(view);
             position++;
             variants.clearCheck();
-            fillForm();
-            showAnswer();
+            fillForm(view);
+            showAnswer(view);
         }
         else if (position == store.size() -1) {
-            showAnswer();
+            showAnswer(view);
             Intent intent = new Intent(getActivity(),
                     ResultActivity.class);
             intent.putExtra(RESULT_FOR, position);
@@ -45,9 +45,9 @@ public class MainFragment extends Fragment {
         RadioGroup variants = view.findViewById(R.id.variants);
         variants.clearCheck();
         position--;
-        this.restoreButtons();
+        this.restoreButtons(view);
         statStore.remove(position);
-        fillForm();
+        fillForm(view);
     }
     @Nullable
     @Override
@@ -77,7 +77,7 @@ public class MainFragment extends Fragment {
                     getActivity().startActivity(intent);
                 }
         );
-        this.fillForm();
+        this.fillForm(view);
         return view;
     }
     @Override
@@ -88,16 +88,12 @@ public class MainFragment extends Fragment {
         outState.putBoolean("buttonNextState", next.isEnabled());
         outState.putIntArray("radioButtons", this.buttonsArray);
     }
-    private void fillForm() {
-        RadioGroup variants = (RadioGroup) Objects.requireNonNull(
-                getActivity()).findViewById(R.id.variants);
-        Button next = (Button) Objects.requireNonNull(
-                getActivity()).findViewById(R.id.next);
-        next.setEnabled(variants.isSelected());
-        Button previous = (Button) Objects.requireNonNull(
-                getActivity()).findViewById(R.id.previous);
+    private void fillForm(View view) {
+        RadioGroup variants = (RadioGroup) view.findViewById(R.id.variants);
+        view.findViewById(R.id.next).setEnabled(variants.isSelected());
+        Button previous = view.findViewById(R.id.previous);
         previous.setEnabled(position != 0);
-        final TextView text = getActivity().findViewById(R.id.question);
+        final TextView text = view.findViewById(R.id.question);
         Question question = store.get(position);
         text.setText(question.getText());
         for (int i = 0; i != 4; i++) {
@@ -107,30 +103,27 @@ public class MainFragment extends Fragment {
             button.setText(option.getText());
         }
     }
-    private void saveButtons() {
-        RadioGroup variants = (RadioGroup) Objects.requireNonNull(
-                getActivity()).findViewById(R.id.variants);
+    private void saveButtons(View view) {
+        RadioGroup variants = (RadioGroup) view.findViewById(R.id.variants);
         Question question = store.get(position);
         int id = variants.getCheckedRadioButtonId();
         Option option = question.getOptions().get(id - 1);
         this.buttonsArray[position] = option.getId();
     }
-    private void restoreButtons() {
-        RadioGroup variants = Objects.requireNonNull(
-                getActivity()).findViewById(R.id.variants);
+    private void restoreButtons(View view) {
+        RadioGroup variants = view.findViewById(R.id.variants);
         variants.check(this.buttonsArray[position]);
     }
-    private void showAnswer() {
-        RadioGroup variants = Objects.requireNonNull(
-                getActivity()).findViewById(R.id.variants);
+    private void showAnswer(View view) {
+        RadioGroup variants = view.findViewById(R.id.variants);
         int id = variants.getCheckedRadioButtonId();
         Question question = store.get(position);
         Toast.makeText(getActivity(), "Your answer is " + id
                         + ", correct is " + question.getAnswer(),
                 Toast.LENGTH_SHORT).show();
     }
-    private void fillStatistic() {
-        RadioGroup variants = Objects.requireNonNull(getActivity()).findViewById(R.id.variants);
+    private void fillStatistic(View view) {
+        RadioGroup variants = (RadioGroup) view.findViewById(R.id.variants);
         Question question = store.get(position);
         int id = variants.getCheckedRadioButtonId();
         statStore.add(new Statistic(id, question.getAnswer()));
