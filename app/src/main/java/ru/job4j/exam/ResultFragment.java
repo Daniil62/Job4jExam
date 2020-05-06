@@ -18,11 +18,17 @@ import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
 public class ResultFragment extends Fragment {
-    public static final String RESULT_FOR = "result_for";
     private StringBuilder sb = new StringBuilder();
     private StatisticStore statStore = new StatisticStore();
     private final QuestionStore qStore = QuestionStore.getInstance();
     private int size = statStore.getStatistic().size();
+    public static ResultFragment of(int value) {
+        ResultFragment result = new ResultFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(ResultActivity.RESULT_FOR, 0);
+        result.setArguments(bundle);
+        return result;
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

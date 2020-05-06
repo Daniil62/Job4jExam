@@ -16,13 +16,19 @@ import java.util.Map;
 import ru.job4j.exam.store.QuestionStore;
 
 public class HintFragment extends Fragment {
-    public static final String HINT_FOR = "hint_for";
     private final QuestionStore store = QuestionStore.getInstance();
     private final Map<Integer, String> answers = new HashMap<Integer, String>();
     public HintFragment() {
         answers.put(0, "Hint 1");
         answers.put(1, "Hint 2");
         answers.put(2, "Hint 3");
+    }
+    public static HintFragment of(int index) {
+        HintFragment hint = new HintFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(HintActivity.HINT_FOR, index);
+        hint.setArguments(bundle);
+        return hint;
     }
     @Nullable
     @Override

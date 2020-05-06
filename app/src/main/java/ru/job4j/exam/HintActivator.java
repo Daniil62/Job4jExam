@@ -5,6 +5,6 @@ import android.support.v4.app.Fragment;
 public class HintActivator extends HintActivity {
     @Override
     public Fragment loadFrg() {
-        return new HintFragment();
+        return HintFragment.of(getIntent().getIntExtra(HintActivity.HINT_FOR, 0));
     }
 }

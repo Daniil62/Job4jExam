@@ -49,6 +49,13 @@ public class MainFragment extends Fragment {
         fillForm();
         next.setEnabled(true);
     }
+    public static MainFragment of(int value) {
+        MainFragment main = new MainFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(MainActivity.MAIN_FOR, 0);
+        main.setArguments(bundle);
+        return main;
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
