@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        android:text="@string/hello_daniil"/>
+        android:text="@string/question"/>
     <RadioGroup
         android:id="@+id/variants"
         android:layout_width="wrap_content"
@@ -46,6 +46,13 @@
         android:layout_gravity="center"
         android:layout_margin="20dp">
 
+        <Button
+            android:id="@+id/toMenu"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:text="@string/toMenu" />
         <Button
             android:id="@+id/previous"
             android:layout_width="wrap_content"

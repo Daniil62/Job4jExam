@@ -27,12 +27,12 @@ public class MainFragment extends Fragment {
     private Button previous;
     private void nextBtn(View view) {
         fillStatistic();
+        showAnswer();
         if (position < store.size() - 1) {
             this.saveButtons();
             position++;
             this.variants.clearCheck();
             fillForm();
-            showAnswer();
         }
         else if (position == store.size() -1) {
             showAnswer();
@@ -48,6 +48,11 @@ public class MainFragment extends Fragment {
         statStore.remove(position);
         fillForm();
         next.setEnabled(true);
+    }
+    private void menuButton(View view) {
+        statStore.clear();
+        Intent intent = new Intent(getActivity(), ExamsActivity.class);
+        startActivity(intent);
     }
     public static MainFragment of(int value) {
         MainFragment main = new MainFragment();
@@ -68,6 +73,8 @@ public class MainFragment extends Fragment {
         next.setOnClickListener(this::nextBtn);
         this.previous = view.findViewById(R.id.previous);
         previous.setOnClickListener(this::prevButton);
+        Button menu = view.findViewById(R.id.toMenu);
+        menu.setOnClickListener(this::menuButton);
         this.variants = view.findViewById(R.id.variants);
         variants.setOnCheckedChangeListener((group, checkedId) -> {
             RadioButton rb = group.findViewById(checkedId);
@@ -80,7 +87,7 @@ public class MainFragment extends Fragment {
                 v -> {
                     Intent intent = new Intent(getActivity(),
                             HintActivator.class);
-                    intent.putExtra(MainActivity.MAIN_FOR, position);
+                    intent.putExtra(MainActivity.MAIN_FOR, 0);
                     getActivity().startActivity(intent);
                 }
         );
@@ -108,7 +115,7 @@ public class MainFragment extends Fragment {
         this.previous.setEnabled(position != 0);
         Question question = store.get(position);
         this.text.setText(question.getText());
-        for (int i = 0; i != 4; i++) {
+        for (int i = 0; i < variants.getChildCount(); i++) {
             RadioButton button = (RadioButton) variants.getChildAt(i);
             Option option = question.getOptions().get(i);
             button.setId(option.getId());

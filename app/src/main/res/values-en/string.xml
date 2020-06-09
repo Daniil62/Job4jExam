@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello_daniil">Hello Daniil !</string>
+    <string name="question">Question</string>
     <string name="radiobutton">RadioButton</string>
     <string name="next">NEXT</string>
     <string name="back">BACK</string>
@@ -10,6 +10,10 @@
     <string name="result">Result</string>
     <string name="answers">Answers</string>
     <string name="finish">Result</string>
+    <string name="toMenu"><![CDATA[<]]></string>
+    <string name="menu">Menu</string>
+    <string name="info">info</string>
+    <string name="date">date</string>
 
     <string name="app_name">Job4j Exam</string>
     <string name="domain_prompt">Set location</string>

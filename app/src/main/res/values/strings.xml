@@ -24,7 +24,7 @@
         <item>СПб</item>
         <item>Рязанская</item>
     </string-array>
-    <string name="hello_daniil">Hello Daniil !</string>
+    <string name="question">Вопрос</string>
     <string name="radiobutton">RadioButton</string>
     <string name="next">ВПЕРЕД</string>
     <string name="back">НАЗАД</string>
@@ -34,4 +34,8 @@
     <string name="result">Результат</string>
     <string name="answers">Ответы</string>
     <string name="finish">Result</string>
+    <string name="toMenu"><![CDATA[<]]></string>
+    <string name="menu">Меню</string>
+    <string name="info">Информация</string>
+    <string name="date">Дата</string>
 </resources>

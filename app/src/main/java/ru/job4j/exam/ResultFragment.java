@@ -1,5 +1,6 @@
 package ru.job4j.exam;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,7 +14,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import java.text.MessageFormat;
 import java.util.Objects;
-
 import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
@@ -29,6 +29,12 @@ public class ResultFragment extends Fragment {
         result.setArguments(bundle);
         return result;
     }
+    private void menuButton(View view) {
+        statStore.clear();
+        Intent intent = new Intent(getActivity(), ExamsActivity.class);
+        startActivity(intent);
+    }
+    @SuppressLint("SimpleDateFormat")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -36,6 +42,8 @@ public class ResultFragment extends Fragment {
         View view = inflater.inflate(R.layout.result_activity, container, false);
         TextView textAnswers = view.findViewById(R.id.textAnswers);
         TextView textScore = view.findViewById(R.id.textScore);
+        Button menu = view.findViewById(R.id.toMenu);
+        menu.setOnClickListener(this::menuButton);
         Button again = view.findViewById(R.id.try_again);
         again.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,6 +70,7 @@ public class ResultFragment extends Fragment {
         else {
             textScore.setTextColor(Color.parseColor("#00FF00"));
         }
+        Exam exam = new Exam(0, "exam 1", 100, index);
         return view;
     }
 }
