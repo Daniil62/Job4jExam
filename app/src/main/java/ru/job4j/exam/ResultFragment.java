@@ -12,7 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import java.io.Serializable;
 import java.text.MessageFormat;
+import java.util.Date;
 import java.util.Objects;
 import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
@@ -22,6 +25,11 @@ public class ResultFragment extends Fragment {
     private StatisticStore statStore = new StatisticStore();
     private final QuestionStore qStore = QuestionStore.getInstance();
     private int size = statStore.getStatistic().size();
+    private static Exam exam;
+    private Date date;
+    public Exam getExam() {
+        return exam;
+    }
     public static ResultFragment of(int value) {
         ResultFragment result = new ResultFragment();
         Bundle bundle = new Bundle();
@@ -34,6 +42,16 @@ public class ResultFragment extends Fragment {
         Intent intent = new Intent(getActivity(), ExamsActivity.class);
         startActivity(intent);
     }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("examId", exam.getId());
+        outState.putString("examName", exam.getName());
+        outState.putLong("examTime", exam.getTime());
+        outState.putInt("examResult", exam.getResult());
+    }
+
     @SuppressLint("SimpleDateFormat")
     @Nullable
     @Override
@@ -56,7 +74,7 @@ public class ResultFragment extends Fragment {
         int index = 0;
         for (int i = 0; i < size; i++) {
             sb.append(qStore.get(i).getText() + "\n" + "Your answer: "
-                    +statStore.getUserAnswer(i) + "\t" + "True answer: "
+                    + statStore.getUserAnswer(i) + "\t" + "True answer: "
                     + statStore.getTrueAnswer(i) + "\n\n");
             textAnswers.setText(sb);
             if (statStore.getUserAnswer(i) == statStore.getTrueAnswer(i)) {
@@ -66,11 +84,19 @@ public class ResultFragment extends Fragment {
         textScore.setText(MessageFormat.format("Score: {0}/{1}", index, size));
         if (index < statStore.getStatistic().size()) {
             textScore.setTextColor(Color.parseColor("#B22222"));
-        }
-        else {
+        } else {
             textScore.setTextColor(Color.parseColor("#00FF00"));
         }
-        Exam exam = new Exam(0, "exam 1", 100, index);
+        if (savedInstanceState != null) {
+            exam = new Exam(savedInstanceState.getInt("examId"),
+                    savedInstanceState.getString("examName"),
+                    savedInstanceState.getLong("examTime"),
+                    savedInstanceState.getInt("examResult"));
+        } else {
+            date = new Date();
+            double result = index / (size * 0.01);
+            exam = new Exam(0, "Exam 1", date.getTime(), (int) result);
+        }
         return view;
     }
 }

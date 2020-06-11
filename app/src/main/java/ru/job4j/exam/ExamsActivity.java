@@ -1,5 +1,6 @@
 package ru.job4j.exam;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,7 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ExamsActivity extends AppCompatActivity {
@@ -43,8 +46,16 @@ public class ExamsActivity extends AppCompatActivity {
             TextView resultText = holder.view.findViewById(R.id.result);
             TextView dateText = holder.view.findViewById(R.id.date);
             infoText.setText(exam.getName());
-            resultText.setText(getString(R.string.result) + ": " + exam.getResult());
-            dateText.setText(getString(R.string.date) + ": " + exam.getTime());
+            if (exam.getTime() != 0) {
+                SimpleDateFormat sd = new SimpleDateFormat("dd.MM.yyyy, HH:mm");
+                resultText.setText(getString(R.string.result) + ": " + exam.getResult() + " %");
+                dateText.setText(getString(R.string.date) + ": " + sd.format(new Date(exam.getTime())));
+                if (exam.getResult() < 95) {
+                    resultText.setTextColor(Color.parseColor("#B22222"));
+                } else {
+                    resultText.setTextColor(Color.parseColor("#00FF00"));
+                }
+            }
             infoText.setOnClickListener(
                     new View.OnClickListener() {
                         @Override
@@ -74,8 +85,13 @@ public class ExamsActivity extends AppCompatActivity {
     private void updateUI() {
         List<Exam> exams = new ArrayList<Exam>();
         for (int i = 0; i < 10; i++) {
-            exams.add(new Exam(i, String.format("Exam %s", i),
-                    System.currentTimeMillis(), i));
+            exams.add(new Exam(i, String.format("Exam %s", i + 1),
+                    0, 0));
+        }
+        ResultFragment resultFragment = new ResultFragment();
+        Exam exam = resultFragment.getExam();
+        if (exam != null) {
+            exams.set(exam.getId(), exam);
         }
         this.recycler.setAdapter(new ExamAdapter(exams));
     }
