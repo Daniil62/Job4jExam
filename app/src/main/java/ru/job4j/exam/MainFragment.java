@@ -39,6 +39,7 @@ public class MainFragment extends Fragment {
             Intent intent = new Intent(getActivity(),
                     ResultActivator.class);
             startActivity(intent);
+            Objects.requireNonNull(getActivity()).finish();
         }
     }
     private void prevButton(View view) {

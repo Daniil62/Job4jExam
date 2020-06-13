@@ -13,18 +13,25 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import ru.job4j.exam.store.ExamStore;
 
 public class ExamsActivity extends AppCompatActivity {
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
     private RecyclerView recycler;
+    private ExamStore examStore;
     @Override
     protected void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.exams);
         this.recycler = findViewById(R.id.exams);
         this.recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        this.examStore = new ExamStore();
         updateUI();
     }
     public class ExamAdapter extends RecyclerView.Adapter<ExamHolder> {
@@ -41,7 +48,7 @@ public class ExamsActivity extends AppCompatActivity {
         }
         @Override
         public void onBindViewHolder(@NonNull ExamHolder holder, int i) {
-            final Exam exam = this.exams.get(i);
+            final Exam exam = examStore.get(i);
             TextView infoText = holder.view.findViewById(R.id.info);
             TextView resultText = holder.view.findViewById(R.id.result);
             TextView dateText = holder.view.findViewById(R.id.date);
@@ -66,13 +73,14 @@ public class ExamsActivity extends AppCompatActivity {
                             ).show();
                             startActivity(new Intent(ExamsActivity.this,
                                     MainActivator.class));
+                            finish();
                         }
                     }
             );
         }
         @Override
         public int getItemCount() {
-            return this.exams.size();
+            return examStore.getExams().size();
         }
     }
     class ExamHolder extends RecyclerView.ViewHolder {
@@ -83,16 +91,15 @@ public class ExamsActivity extends AppCompatActivity {
         }
     }
     private void updateUI() {
-        List<Exam> exams = new ArrayList<Exam>();
         for (int i = 0; i < 10; i++) {
-            exams.add(new Exam(i, String.format("Exam %s", i + 1),
+            examStore.add(new Exam(i, String.format("Exam %s", i + 1),
                     0, 0));
         }
         ResultFragment resultFragment = new ResultFragment();
         Exam exam = resultFragment.getExam();
         if (exam != null) {
-            exams.set(exam.getId(), exam);
+            examStore.set(exam.getId(), exam);
         }
-        this.recycler.setAdapter(new ExamAdapter(exams));
+        this.recycler.setAdapter(new ExamAdapter(examStore.getExams()));
     }
 }

@@ -12,8 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
-import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -26,7 +24,6 @@ public class ResultFragment extends Fragment {
     private final QuestionStore qStore = QuestionStore.getInstance();
     private int size = statStore.getStatistic().size();
     private static Exam exam;
-    private Date date;
     public Exam getExam() {
         return exam;
     }
@@ -41,8 +38,8 @@ public class ResultFragment extends Fragment {
         statStore.clear();
         Intent intent = new Intent(getActivity(), ExamsActivity.class);
         startActivity(intent);
+        Objects.requireNonNull(getActivity()).finish();
     }
-
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -51,7 +48,6 @@ public class ResultFragment extends Fragment {
         outState.putLong("examTime", exam.getTime());
         outState.putInt("examResult", exam.getResult());
     }
-
     @SuppressLint("SimpleDateFormat")
     @Nullable
     @Override
@@ -93,7 +89,7 @@ public class ResultFragment extends Fragment {
                     savedInstanceState.getLong("examTime"),
                     savedInstanceState.getInt("examResult"));
         } else {
-            date = new Date();
+            Date date = new Date();
             double result = index / (size * 0.01);
             exam = new Exam(0, "Exam 1", date.getTime(), (int) result);
         }
