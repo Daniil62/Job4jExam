@@ -3,6 +3,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +17,8 @@ import java.util.Objects;
 import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements ConfirmHintDialogFragment
+        .ConfirmHintDialogListener{
     private StatisticStore statStore = new StatisticStore();
     private final QuestionStore store = QuestionStore.getInstance();
     private int position = 0;
@@ -86,10 +88,9 @@ public class MainFragment extends Fragment {
         Button hint = view.findViewById(R.id.hint);
         hint.setOnClickListener(
                 v -> {
-                    Intent intent = new Intent(getActivity(),
-                            HintActivator.class);
-                    intent.putExtra(MainActivity.MAIN_FOR, 0);
-                    getActivity().startActivity(intent);
+                    DialogFragment dialog = new ConfirmHintDialogFragment();
+                    assert getFragmentManager() != null;
+                    dialog.show(getFragmentManager(), "dialog_tag");
                 }
         );
         if (savedInstanceState != null) {
@@ -143,5 +144,17 @@ public class MainFragment extends Fragment {
         Question question = store.get(position);
         int id = this.variants.getCheckedRadioButtonId();
         statStore.add(new Statistic(id, question.getAnswer()));
+    }
+
+    @Override
+    public void positiveDialogClick(DialogFragment dialog) {
+        Intent intent = new Intent(getActivity(),
+                HintFragment.class);
+        intent.putExtra(MainActivity.MAIN_FOR, 0);
+        Objects.requireNonNull(getActivity()).startActivity(intent);
+    }
+    @Override
+    public void negativeDialogClick(DialogFragment dialog) {
+        Toast.makeText(getActivity(), "возьми с полки пирожок.", Toast.LENGTH_SHORT).show();
     }
 }

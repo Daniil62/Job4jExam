@@ -38,4 +38,6 @@
     <string name="menu">Меню</string>
     <string name="info">Информация</string>
     <string name="date">Дата</string>
+    <string name="ok">Да</string>
+    <string name="cancel">Отмена</string>
 </resources>
