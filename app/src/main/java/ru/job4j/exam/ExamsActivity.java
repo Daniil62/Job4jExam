@@ -4,12 +4,14 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.text.SimpleDateFormat;
@@ -32,6 +34,11 @@ public class ExamsActivity extends AppCompatActivity {
         this.recycler = findViewById(R.id.exams);
         this.recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         this.examStore = new ExamStore();
+        Button setDate = findViewById(R.id.exams_set_date);
+        setDate.setOnClickListener(v -> {
+            Intent intent = new Intent(this, DateTimeActivator.class);
+            startActivity(intent);
+        });
         updateUI();
     }
     public class ExamAdapter extends RecyclerView.Adapter<ExamHolder> {

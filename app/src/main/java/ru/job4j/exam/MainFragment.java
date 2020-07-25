@@ -17,8 +17,7 @@ import java.util.Objects;
 import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
-public class MainFragment extends Fragment implements ConfirmHintDialogFragment
-        .ConfirmHintDialogListener{
+public class MainFragment extends Fragment {
     private StatisticStore statStore = new StatisticStore();
     private final QuestionStore store = QuestionStore.getInstance();
     private int position = 0;
@@ -144,17 +143,5 @@ public class MainFragment extends Fragment implements ConfirmHintDialogFragment
         Question question = store.get(position);
         int id = this.variants.getCheckedRadioButtonId();
         statStore.add(new Statistic(id, question.getAnswer()));
-    }
-
-    @Override
-    public void positiveDialogClick(DialogFragment dialog) {
-        Intent intent = new Intent(getActivity(),
-                HintFragment.class);
-        intent.putExtra(MainActivity.MAIN_FOR, 0);
-        Objects.requireNonNull(getActivity()).startActivity(intent);
-    }
-    @Override
-    public void negativeDialogClick(DialogFragment dialog) {
-        Toast.makeText(getActivity(), "возьми с полки пирожок.", Toast.LENGTH_SHORT).show();
     }
 }

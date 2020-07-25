@@ -19,6 +19,7 @@
         <activity android:name=".MainActivator"/>
             <activity android:name=".HintActivator"/>
             <activity android:name=".ResultActivator"/>
+            <activity android:name=".DateTimeActivator"/>
 
     </application>
 
