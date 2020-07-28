@@ -19,4 +19,10 @@ public class ExamStore {
     public Exam get(int index) {
         return exams.get(index);
     }
+    public void clear() {
+        exams.clear();
+    }
+    public int size() {
+        return exams.size();
+    }
 }

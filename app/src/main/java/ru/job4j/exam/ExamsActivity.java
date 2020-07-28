@@ -1,4 +1,5 @@
 package ru.job4j.exam;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -9,9 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.text.SimpleDateFormat;
@@ -19,7 +22,8 @@ import java.util.Date;
 import java.util.List;
 import ru.job4j.exam.store.ExamStore;
 
-public class ExamsActivity extends AppCompatActivity {
+public class ExamsActivity extends AppCompatActivity implements DialogExamsDelete
+        .ExamsDeleteDialogListener {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -34,11 +38,6 @@ public class ExamsActivity extends AppCompatActivity {
         this.recycler = findViewById(R.id.exams);
         this.recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         this.examStore = new ExamStore();
-        Button setDate = findViewById(R.id.exams_set_date);
-        setDate.setOnClickListener(v -> {
-            Intent intent = new Intent(this, DateTimeActivator.class);
-            startActivity(intent);
-        });
         updateUI();
     }
     public class ExamAdapter extends RecyclerView.Adapter<ExamHolder> {
@@ -98,7 +97,7 @@ public class ExamsActivity extends AppCompatActivity {
         }
     }
     private void updateUI() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1; i++) {
             examStore.add(new Exam(i, String.format("Exam %s", i + 1),
                     0, 0));
         }
@@ -108,5 +107,47 @@ public class ExamsActivity extends AppCompatActivity {
             examStore.set(exam.getId(), exam);
         }
         this.recycler.setAdapter(new ExamAdapter(examStore.getExams()));
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.exams, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_date_time_set: {
+                Intent intent = new Intent(this, DateTimeActivator.class);
+                startActivity(intent);
+                return true;
+            }
+            case R.id.menu_add_item: {
+                ExamStore es = new ExamStore();
+                es.add(new Exam(es.getExams().size(), "new exam", 0, 0));
+                updateUI();
+                Toast.makeText(ExamsActivity.this, R.string.new_item_added,
+                        Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            case R.id.menu_delete_items: {
+                DialogFragment dialog = new DialogExamsDelete();
+                dialog.show(getSupportFragmentManager(), "delete_items_dialog");
+                return true;
+            }
+            default: {
+                return super.onOptionsItemSelected(item);
+            }
+        }
+    }
+    @Override
+    public void positiveExamsDeleteClick(DialogExamsDelete ded) {
+        examStore.clear();
+        updateUI();
+        Toast.makeText(ExamsActivity.this, R.string.all_items_deleted,
+                Toast.LENGTH_SHORT).show();
+    }
+    @Override
+    public void negativeExamsDeleteClick(DialogExamsDelete ded) {
     }
 }
