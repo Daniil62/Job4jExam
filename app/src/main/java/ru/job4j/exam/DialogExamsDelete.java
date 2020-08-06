@@ -3,7 +3,6 @@ package ru.job4j.exam;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,17 +13,9 @@ public class DialogExamsDelete extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity()).setMessage(R.string.delete_all)
-                .setPositiveButton(R.string.delete_items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.positiveExamsDeleteClick(DialogExamsDelete.this);
-                    }
-                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.negativeExamsDeleteClick(DialogExamsDelete.this);
-                    }
-                }).create();
+                .setPositiveButton(R.string.delete_items, (dialog, which) -> callback.positiveExamsDeleteClick(
+                        DialogExamsDelete.this)).setNegativeButton(R.string.cancel, (dialog, which) ->
+                        callback.negativeExamsDeleteClick(DialogExamsDelete.this)).create();
     }
     public interface ExamsDeleteDialogListener {
         void positiveExamsDeleteClick(DialogExamsDelete ded);

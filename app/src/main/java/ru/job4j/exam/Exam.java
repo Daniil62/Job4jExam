@@ -16,10 +16,10 @@ public class Exam {
     String getName() {
         return name;
     }
-    public long getTime() {
+    long getTime() {
         return time;
     }
-    public int getResult() {
+    int getResult() {
         return result;
     }
     public int getId() {

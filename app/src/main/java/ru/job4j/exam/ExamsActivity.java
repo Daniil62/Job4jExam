@@ -70,17 +70,14 @@ public class ExamsActivity extends AppCompatActivity implements DialogExamsDelet
                 }
             }
             infoText.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Toast.makeText(
-                                    getApplicationContext(), "You select " + exam,
-                                    Toast.LENGTH_SHORT
-                            ).show();
-                            startActivity(new Intent(ExamsActivity.this,
-                                    MainActivator.class));
-                            finish();
-                        }
+                    view -> {
+                        Toast.makeText(
+                                getApplicationContext(), "You select " + exam,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        startActivity(new Intent(ExamsActivity.this,
+                                MainActivator.class));
+                        finish();
                     }
             );
         }

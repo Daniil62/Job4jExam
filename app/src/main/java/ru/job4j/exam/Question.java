@@ -22,7 +22,7 @@ public class Question {
     List<Option> getOptions() {
         return  this.options;
     }
-    public int getAnswer() {
+    int getAnswer() {
         return  this.answer;
     }
 }

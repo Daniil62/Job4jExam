@@ -59,13 +59,10 @@ public class ResultFragment extends Fragment {
         Button menu = view.findViewById(R.id.toMenu);
         menu.setOnClickListener(this::menuButton);
         Button again = view.findViewById(R.id.try_again);
-        again.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), MainActivator.class);
-                Objects.requireNonNull(getActivity()).startActivity(intent);
-                statStore.clear();
-            }
+        again.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), MainActivator.class);
+            Objects.requireNonNull(getActivity()).startActivity(intent);
+            statStore.clear();
         });
         int index = 0;
         for (int i = 0; i < size; i++) {
