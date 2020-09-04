@@ -53,13 +53,13 @@ public class MainFragment extends Fragment {
     }
     private void menuButton(View view) {
         statStore.clear();
-        Intent intent = new Intent(getActivity(), ExamsActivity.class);
+        Intent intent = new Intent(getActivity(), ExamListActivator.class);
         startActivity(intent);
     }
     public static MainFragment of(int value) {
         MainFragment main = new MainFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(MainActivity.MAIN_FOR, 0);
+        bundle.putInt(MainActivity.MAIN_FOR, value);
         main.setArguments(bundle);
         return main;
     }

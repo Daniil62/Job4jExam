@@ -1,12 +1,15 @@
 package ru.job4j.exam;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,28 +21,48 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import ru.job4j.exam.store.ExamStore;
 
-public class ExamsActivity extends AppCompatActivity implements DialogExamsDelete
+public class ExamListFragment extends Fragment implements DialogExamsDelete
         .ExamsDeleteDialogListener {
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
-    }
     private RecyclerView recycler;
     private ExamStore examStore;
+/*    @Override
+    public void onBackPressed() {
+        super.getActivity().onBackPressed();
+        getActivity().finish();
+    }  */
+    private SQLiteDatabase store;
+    public static ExamListFragment of (int value) {
+        ExamListFragment elf = new ExamListFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(ExamListActivity.EXAM_LIST_FOR, value);
+        elf.setArguments(bundle);
+        return elf;
+    }
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle state) {
-        super.onCreate(state);
-        setContentView(R.layout.exams);
-        this.recycler = findViewById(R.id.exams);
-        this.recycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.exams, container, false);
+        this.recycler = view.findViewById(R.id.exams);
+        this.recycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        this.store = new ExamBaseHelper(getContext()).getWritableDatabase();
         this.examStore = new ExamStore();
         updateUI();
+        return view;
     }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     public class ExamAdapter extends RecyclerView.Adapter<ExamHolder> {
         private final List<Exam> exams;
         ExamAdapter(List<Exam> exams) {
@@ -54,7 +77,7 @@ public class ExamsActivity extends AppCompatActivity implements DialogExamsDelet
         }
         @Override
         public void onBindViewHolder(@NonNull ExamHolder holder, int i) {
-            final Exam exam = examStore.get(i);
+            final Exam exam = exams.get(i);
             TextView infoText = holder.view.findViewById(R.id.info);
             TextView resultText = holder.view.findViewById(R.id.result);
             TextView dateText = holder.view.findViewById(R.id.date);
@@ -72,12 +95,12 @@ public class ExamsActivity extends AppCompatActivity implements DialogExamsDelet
             infoText.setOnClickListener(
                     view -> {
                         Toast.makeText(
-                                getApplicationContext(), "You select " + exam,
+                                getContext(), "You select " + exam,
                                 Toast.LENGTH_SHORT
                         ).show();
-                        startActivity(new Intent(ExamsActivity.this,
+                        startActivity(new Intent(getActivity(),
                                 MainActivator.class));
-                        finish();
+                        Objects.requireNonNull(getActivity()).finish();
                     }
             );
         }
@@ -94,7 +117,19 @@ public class ExamsActivity extends AppCompatActivity implements DialogExamsDelet
         }
     }
     private void updateUI() {
-        for (int i = 0; i < 1; i++) {
+        List<Exam> exams = new ArrayList<>();
+        Cursor cursor = this.store.query(ExamDbSchema.ExamTable.NAME, null, null,
+                null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            exams.add(new Exam(cursor.getInt(cursor.getColumnIndex("id")),
+                    cursor.getString(cursor.getColumnIndex("title")),
+                    0, (float) 0.0));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        this.recycler.setAdapter(new ExamAdapter(exams));
+     /*   for (int i = 0; i < 1; i++) {
             examStore.add(new Exam(i, String.format("Exam %s", i + 1),
                     0, 0));
         }
@@ -103,33 +138,38 @@ public class ExamsActivity extends AppCompatActivity implements DialogExamsDelet
         if (exam != null) {
             examStore.set(exam.getId(), exam);
         }
-        this.recycler.setAdapter(new ExamAdapter(examStore.getExams()));
+        this.recycler.setAdapter(new ExamAdapter(examStore.getExams()));   */
     }
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.exams, menu);
-        return true;
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_date_time_set: {
-                Intent intent = new Intent(this, DateTimeActivator.class);
+                Intent intent = new Intent(getActivity(), DateTimeActivator.class);
                 startActivity(intent);
                 return true;
             }
             case R.id.menu_add_item: {
-                ExamStore es = new ExamStore();
+                FragmentManager manager = Objects.requireNonNull(getActivity())
+                        .getSupportFragmentManager();
+                manager.beginTransaction().replace(R.id.exams, new ExamAddFragment())
+                        .addToBackStack(null).commit();
+                return true;
+           /*     ExamStore es = new ExamStore();
                 es.add(new Exam(es.getExams().size(), "new exam", 0, 0));
                 updateUI();
-                Toast.makeText(ExamsActivity.this, R.string.new_item_added,
+                Toast.makeText(getActivity(), R.string.new_item_added,
                         Toast.LENGTH_SHORT).show();
-                return true;
+                return true;    */
             }
             case R.id.menu_delete_items: {
                 DialogFragment dialog = new DialogExamsDelete();
-                dialog.show(getSupportFragmentManager(), "delete_items_dialog");
+                assert getFragmentManager() != null;
+                dialog.show(getFragmentManager(), "delete_items_dialog");
                 return true;
             }
             default: {
@@ -141,7 +181,7 @@ public class ExamsActivity extends AppCompatActivity implements DialogExamsDelet
     public void positiveExamsDeleteClick(DialogExamsDelete ded) {
         examStore.clear();
         updateUI();
-        Toast.makeText(ExamsActivity.this, R.string.all_items_deleted,
+        Toast.makeText(getContext(), R.string.all_items_deleted,
                 Toast.LENGTH_SHORT).show();
     }
     @Override

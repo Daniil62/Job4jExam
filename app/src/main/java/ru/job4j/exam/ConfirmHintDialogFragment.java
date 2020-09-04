@@ -3,7 +3,6 @@ package ru.job4j.exam;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,18 +13,10 @@ public class ConfirmHintDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity()).setMessage("Показать подсказку?")
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callBack.positiveDialogClick(ConfirmHintDialogFragment.this);
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callBack.negativeDialogClick(ConfirmHintDialogFragment.this);
-                    }
-                }).create();
+                .setPositiveButton(R.string.ok, (dialog, which) ->
+                        callBack.positiveDialogClick(ConfirmHintDialogFragment.this))
+                .setNegativeButton(R.string.cancel, (dialog, which) ->
+                        callBack.negativeDialogClick(ConfirmHintDialogFragment.this)).create();
     }
     public interface ConfirmHintDialogListener {
         void positiveDialogClick(DialogFragment dialog);

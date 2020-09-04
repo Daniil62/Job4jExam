@@ -30,13 +30,13 @@ public class ResultFragment extends Fragment {
     public static ResultFragment of(int value) {
         ResultFragment result = new ResultFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(ResultActivity.RESULT_FOR, 0);
+        bundle.putInt(ResultActivity.RESULT_FOR, value);
         result.setArguments(bundle);
         return result;
     }
     private void menuButton(View view) {
         statStore.clear();
-        Intent intent = new Intent(getActivity(), ExamsActivity.class);
+        Intent intent = new Intent(getActivity(), ExamListActivator.class);
         startActivity(intent);
         Objects.requireNonNull(getActivity()).finish();
     }
@@ -46,7 +46,7 @@ public class ResultFragment extends Fragment {
         outState.putInt("examId", exam.getId());
         outState.putString("examName", exam.getName());
         outState.putLong("examTime", exam.getTime());
-        outState.putInt("examResult", exam.getResult());
+        outState.putFloat("examResult", exam.getResult());
     }
     @SuppressLint("SimpleDateFormat")
     @Nullable
@@ -84,7 +84,7 @@ public class ResultFragment extends Fragment {
             exam = new Exam(savedInstanceState.getInt("examId"),
                     savedInstanceState.getString("examName"),
                     savedInstanceState.getLong("examTime"),
-                    savedInstanceState.getInt("examResult"));
+                    savedInstanceState.getFloat("examResult"));
         } else {
             Date date = new Date();
             double result = index / (size * 0.01);

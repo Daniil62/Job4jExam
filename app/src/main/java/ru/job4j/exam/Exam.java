@@ -6,8 +6,8 @@ public class Exam {
     private int id;
     private String name;
     private long time;
-    private int result;
-    Exam(int id, String name, long time, int result) {
+    private float result;
+    Exam(int id, String name, long time, float result) {
         this.id = id;
         this.name = name;
         this.time = time;
@@ -19,7 +19,7 @@ public class Exam {
     long getTime() {
         return time;
     }
-    int getResult() {
+    float getResult() {
         return result;
     }
     public int getId() {
