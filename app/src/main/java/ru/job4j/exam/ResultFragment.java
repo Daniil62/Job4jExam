@@ -1,7 +1,9 @@
 package ru.job4j.exam;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -23,6 +25,8 @@ public class ResultFragment extends Fragment {
     private StatisticStore statStore = new StatisticStore();
     private final QuestionStore qStore = QuestionStore.getInstance();
     private int size = statStore.getStatistic().size();
+    private SQLiteDatabase db;
+    private int index;
     private static Exam exam;
     public Exam getExam() {
         return exam;
@@ -36,7 +40,7 @@ public class ResultFragment extends Fragment {
     }
     private void menuButton(View view) {
         statStore.clear();
-        Intent intent = new Intent(getActivity(), ExamListActivator.class);
+        Intent intent = new Intent(getActivity(), ExamListActivity.class);
         startActivity(intent);
         Objects.requireNonNull(getActivity()).finish();
     }
@@ -47,6 +51,7 @@ public class ResultFragment extends Fragment {
         outState.putString("examName", exam.getName());
         outState.putLong("examTime", exam.getTime());
         outState.putFloat("examResult", exam.getResult());
+        outState.putBoolean("examMark", exam.isMark());
     }
     @SuppressLint("SimpleDateFormat")
     @Nullable
@@ -54,6 +59,8 @@ public class ResultFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.result_activity, container, false);
+        this.db = new ExamBaseHelper(getContext()).getWritableDatabase();
+        int id = Objects.requireNonNull(getActivity()).getIntent().getIntExtra("id", 0);
         TextView textAnswers = view.findViewById(R.id.textAnswers);
         TextView textScore = view.findViewById(R.id.textScore);
         Button menu = view.findViewById(R.id.toMenu);
@@ -64,7 +71,7 @@ public class ResultFragment extends Fragment {
             Objects.requireNonNull(getActivity()).startActivity(intent);
             statStore.clear();
         });
-        int index = 0;
+        index = 0;
         for (int i = 0; i < size; i++) {
             sb.append(qStore.get(i).getText() + "\n" + "Your answer: "
                     + statStore.getUserAnswer(i) + "\t" + "True answer: "
@@ -84,12 +91,23 @@ public class ResultFragment extends Fragment {
             exam = new Exam(savedInstanceState.getInt("examId"),
                     savedInstanceState.getString("examName"),
                     savedInstanceState.getLong("examTime"),
-                    savedInstanceState.getFloat("examResult"));
+                    savedInstanceState.getFloat("examResult"),
+                    savedInstanceState.getBoolean("examMark"));
         } else {
-            Date date = new Date();
-            double result = index / (size * 0.01);
-            exam = new Exam(0, "Exam 1", date.getTime(), (int) result);
+         setExamDate(id);
+         setExamResult(id);
         }
         return view;
+    }
+    private void setExamDate(int id) {
+        ContentValues values = new ContentValues();
+        Date date = new Date();
+        values.put(ExamDbSchema.ExamTable.Cols.TIME, date.getTime());
+        db.update(ExamDbSchema.ExamTable.TAB_NAME, values, "id = " + id, new String[]{});
+    }
+    private void setExamResult(int id) {
+        ContentValues values = new ContentValues();
+        values.put(ExamDbSchema.ExamTable.Cols.RESULT, index / (size * 0.01));
+        db.update(ExamDbSchema.ExamTable.TAB_NAME, values, "id = " + id, new String[]{});
     }
 }

@@ -7,11 +7,13 @@ public class Exam {
     private String name;
     private long time;
     private float result;
-    Exam(int id, String name, long time, float result) {
+    private boolean mark;
+    Exam(int id, String name, long time, float result, boolean mark) {
         this.id = id;
         this.name = name;
         this.time = time;
         this.result = result;
+        this.mark = mark;
     }
     String getName() {
         return name;
@@ -24,6 +26,12 @@ public class Exam {
     }
     public int getId() {
         return id;
+    }
+    boolean isMark() {
+        return mark;
+    }
+    void setMark(boolean mark) {
+        this.mark = mark;
     }
     @Override
     public boolean equals(Object o) {

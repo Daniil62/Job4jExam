@@ -14,14 +14,21 @@
     <string name="menu">Menu</string>
     <string name="info">info</string>
     <string name="date">date</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="add_item">Add</string>
     <string name="delete_items">Delete</string>
-    <string name="delete_all">Delete all?</string>
+    <string name="delete_selected">Delete selected?</string>
     <string name="all_items_deleted">List is empty.</string>
     <string name="new_item_added">New item added.</string>
     <string name="set_date">Set date</string>
+    <string-array name="numbers">
+        <item></item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
 
     <string name="app_name">Job4j Exam</string>
     <string name="domain_prompt">Set location</string>

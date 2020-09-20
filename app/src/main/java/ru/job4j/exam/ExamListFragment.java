@@ -1,5 +1,7 @@
 package ru.job4j.exam;
 
+import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -18,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.text.SimpleDateFormat;
@@ -25,25 +28,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import ru.job4j.exam.store.ExamStore;
 
-public class ExamListFragment extends Fragment implements DialogExamsDelete
-        .ExamsDeleteDialogListener {
+public class ExamListFragment extends Fragment {
     private RecyclerView recycler;
-    private ExamStore examStore;
-/*    @Override
-    public void onBackPressed() {
-        super.getActivity().onBackPressed();
-        getActivity().finish();
-    }  */
     private SQLiteDatabase store;
-    public static ExamListFragment of (int value) {
-        ExamListFragment elf = new ExamListFragment();
-        Bundle bundle = new Bundle();
-        bundle.putInt(ExamListActivity.EXAM_LIST_FOR, value);
-        elf.setArguments(bundle);
-        return elf;
-    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -52,21 +40,39 @@ public class ExamListFragment extends Fragment implements DialogExamsDelete
         this.recycler = view.findViewById(R.id.exams);
         this.recycler.setLayoutManager(new LinearLayoutManager(getContext()));
         this.store = new ExamBaseHelper(getContext()).getWritableDatabase();
-        this.examStore = new ExamStore();
+        setHasOptionsMenu(true);
         updateUI();
         return view;
     }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+    private void updateUI() {
+        List<Exam> exams = new ArrayList<>();
+        Cursor cursor = this.store.query(ExamDbSchema.ExamTable.TAB_NAME, null,
+                null, null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            exams.add(new Exam(cursor.getInt(cursor.getColumnIndex("id")),
+                    cursor.getString(cursor.getColumnIndex("exam_name")),
+                    cursor.getLong(cursor.getColumnIndex("exam_date")),
+                    cursor.getFloat(cursor.getColumnIndex("exam_result")),
+                    cursor.getInt(cursor.getColumnIndex("exam_mark")) > 0)
+            );
+            cursor.moveToNext();
+        }
+        cursor.close();
+        this.recycler.setAdapter(new ExamAdapter(exams));
     }
-
     public class ExamAdapter extends RecyclerView.Adapter<ExamHolder> {
         private final List<Exam> exams;
         ExamAdapter(List<Exam> exams) {
             this.exams = exams;
+        }
+        @Override
+        public int getItemViewType(int position) {
+            return position;
+        }
+        @Override
+        public long getItemId(int position) {
+            return position;
         }
         @NonNull
         @Override
@@ -81,32 +87,68 @@ public class ExamListFragment extends Fragment implements DialogExamsDelete
             TextView infoText = holder.view.findViewById(R.id.info);
             TextView resultText = holder.view.findViewById(R.id.result);
             TextView dateText = holder.view.findViewById(R.id.date);
+            CheckBox check = holder.view.findViewById(R.id.exam_checkBox);
+            holder.view.setId(exam.getId());
             infoText.setText(exam.getName());
-            if (exam.getTime() != 0) {
-                SimpleDateFormat sd = new SimpleDateFormat("dd.MM.yyyy, HH:mm");
-                resultText.setText(getString(R.string.result) + ": " + exam.getResult() + " %");
-                dateText.setText(getString(R.string.date) + ": " + sd.format(new Date(exam.getTime())));
-                if (exam.getResult() < 95) {
-                    resultText.setTextColor(Color.parseColor("#B22222"));
-                } else {
-                    resultText.setTextColor(Color.parseColor("#00FF00"));
-                }
+            if ((i % 2) == 0) {
+                holder.view.setBackgroundColor(Color.parseColor("#D8D8D8"));
             }
-            infoText.setOnClickListener(
-                    view -> {
-                        Toast.makeText(
-                                getContext(), "You select " + exam,
-                                Toast.LENGTH_SHORT
-                        ).show();
-                        startActivity(new Intent(getActivity(),
-                                MainActivator.class));
-                        Objects.requireNonNull(getActivity()).finish();
-                    }
+            makeItemView(exam, resultText, dateText);
+            holder.view.setOnClickListener(
+                    view -> onExamClick(exam)
             );
+            check.setChecked(exam.isMark());
+            check.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                exam.setMark(isChecked);
+                ContentValues values = new ContentValues();
+                values.put(ExamDbSchema.ExamTable.Cols.MARK, isChecked);
+                store.update(ExamDbSchema.ExamTable.TAB_NAME, values, "id = "
+                        + exam.getId(), new String[]{});
+            });
+            holder.view.findViewById(R.id.exam_edit_button).setOnClickListener(v -> {
+                FragmentManager fm = Objects.requireNonNull(getActivity())
+                        .getSupportFragmentManager();
+                Fragment fragment = new ExamUpdateFragment();
+                Bundle bundle = new Bundle();
+                bundle.putInt("id", exam.getId());
+                bundle.putString("name", exam.getName());
+                fragment.setArguments(bundle);
+                fm.beginTransaction().replace(R.id.list_exams, fragment)
+                        .addToBackStack(null).commit();
+            });
         }
         @Override
         public int getItemCount() {
-            return examStore.getExams().size();
+            return exams.size();
+        }
+        private void makeItemView(Exam exam, TextView resultText, TextView dateText) {
+            if (exam.getTime() != 0) {
+                int f = exam.getResult() == 100.0 ? 0 : 1;
+                String result = getString(R.string.result) + ": "
+                        + String.format("%." + f + "f", exam.getResult()) + " %";
+                @SuppressLint("SimpleDateFormat")
+                SimpleDateFormat sd = new SimpleDateFormat("dd.MM.yyyy, HH:mm");
+                String date = getString(R.string.date) + ": " + sd.format(new Date(exam.getTime()));
+                resultText.setText(result);
+                dateText.setText(date);
+                resultPainter(resultText, exam.getResult());
+            }
+        }
+        private void resultPainter(TextView tv, float score) {
+            int r = 255;
+            int g = 0;
+            double percent = (score * 2.5);
+            tv.setTextColor(Color.rgb(r - (int) percent, g + (int) percent, 10));
+        }
+        private void onExamClick(Exam exam) {
+            Toast.makeText(
+                    getContext(), "You select " + exam.getName(),
+                    Toast.LENGTH_SHORT
+            ).show();
+            Intent intent = new Intent(getActivity(), MainActivator.class);
+            intent.putExtra("id", exam.getId());
+            startActivity(intent);
+            Objects.requireNonNull(getActivity()).finish();
         }
     }
     class ExamHolder extends RecyclerView.ViewHolder {
@@ -115,30 +157,6 @@ public class ExamListFragment extends Fragment implements DialogExamsDelete
             super(view);
             this.view = itemView;
         }
-    }
-    private void updateUI() {
-        List<Exam> exams = new ArrayList<>();
-        Cursor cursor = this.store.query(ExamDbSchema.ExamTable.NAME, null, null,
-                null, null, null, null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            exams.add(new Exam(cursor.getInt(cursor.getColumnIndex("id")),
-                    cursor.getString(cursor.getColumnIndex("title")),
-                    0, (float) 0.0));
-            cursor.moveToNext();
-        }
-        cursor.close();
-        this.recycler.setAdapter(new ExamAdapter(exams));
-     /*   for (int i = 0; i < 1; i++) {
-            examStore.add(new Exam(i, String.format("Exam %s", i + 1),
-                    0, 0));
-        }
-        ResultFragment resultFragment = new ResultFragment();
-        Exam exam = resultFragment.getExam();
-        if (exam != null) {
-            examStore.set(exam.getId(), exam);
-        }
-        this.recycler.setAdapter(new ExamAdapter(examStore.getExams()));   */
     }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -156,35 +174,19 @@ public class ExamListFragment extends Fragment implements DialogExamsDelete
             case R.id.menu_add_item: {
                 FragmentManager manager = Objects.requireNonNull(getActivity())
                         .getSupportFragmentManager();
-                manager.beginTransaction().replace(R.id.exams, new ExamAddFragment())
+                manager.beginTransaction().replace(R.id.list_exams, new ExamAddFragment())
                         .addToBackStack(null).commit();
                 return true;
-           /*     ExamStore es = new ExamStore();
-                es.add(new Exam(es.getExams().size(), "new exam", 0, 0));
-                updateUI();
-                Toast.makeText(getActivity(), R.string.new_item_added,
-                        Toast.LENGTH_SHORT).show();
-                return true;    */
             }
             case R.id.menu_delete_items: {
                 DialogFragment dialog = new DialogExamsDelete();
-                assert getFragmentManager() != null;
-                dialog.show(getFragmentManager(), "delete_items_dialog");
+                dialog.show(Objects.requireNonNull(getActivity())
+                        .getSupportFragmentManager(), "dialog_exams_delete");
                 return true;
             }
             default: {
                 return super.onOptionsItemSelected(item);
             }
         }
-    }
-    @Override
-    public void positiveExamsDeleteClick(DialogExamsDelete ded) {
-        examStore.clear();
-        updateUI();
-        Toast.makeText(getContext(), R.string.all_items_deleted,
-                Toast.LENGTH_SHORT).show();
-    }
-    @Override
-    public void negativeExamsDeleteClick(DialogExamsDelete ded) {
     }
 }

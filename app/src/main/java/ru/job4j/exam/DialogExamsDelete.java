@@ -12,7 +12,7 @@ public class DialogExamsDelete extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getActivity()).setMessage(R.string.delete_all)
+        return new AlertDialog.Builder(getActivity()).setMessage(R.string.delete_selected)
                 .setPositiveButton(R.string.delete_items, (dialog, which) -> callback.positiveExamsDeleteClick(
                         DialogExamsDelete.this)).setNegativeButton(R.string.cancel, (dialog, which) ->
                         callback.negativeExamsDeleteClick(DialogExamsDelete.this)).create();
