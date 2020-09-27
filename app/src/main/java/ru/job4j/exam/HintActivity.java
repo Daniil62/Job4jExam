@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 public abstract class HintActivity extends AppCompatActivity {
     public static final String HINT_FOR = "hint_for";
     public abstract Fragment loadFrg();
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

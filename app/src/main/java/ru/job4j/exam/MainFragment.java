@@ -2,7 +2,6 @@ package ru.job4j.exam;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,20 +15,18 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
 public class MainFragment extends Fragment {
-    private SQLiteOpenHelper helper;
     private SQLiteDatabase db;
-    private List<Question> questions;
-    private List<Option> answers;
+    private static List<Question> store = new ArrayList<>();
+    public static List<Question> getStore() {
+        return store;
+    }
     private StatisticStore statStore = new StatisticStore();
-    private final QuestionStore store = QuestionStore.getInstance();
     private int position = 0;
     private int id;
     private int[] buttonsArray = new int[store.size()];
@@ -46,7 +43,7 @@ public class MainFragment extends Fragment {
             this.variants.clearCheck();
             fillForm();
         }
-        else if (position == store.size() -1) {
+        else if (position == store.size() - 1) {
             showAnswer();
             Intent intent = new Intent(getActivity(),
                     ResultActivator.class);
@@ -80,42 +77,16 @@ public class MainFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_main, container, false);
-        this.helper = new ExamBaseHelper(getContext());
-        this.db = helper.getReadableDatabase();
-        this.questions = new ArrayList<>();
-        this.answers = new ArrayList<>();
         this.text = view.findViewById(R.id.question);
         this.next = view.findViewById(R.id.next);
         this.previous = view.findViewById(R.id.previous);
         this.variants = view.findViewById(R.id.variants);
-        this.position = Objects.requireNonNull(getActivity()).getIntent().getIntExtra(
-                MainActivity.MAIN_FOR, 0);
-  /*      Cursor questionCursor = db.query(ExamDbSchema.ExamTable.TAB_NAME, new String[]{
-                "question_id", "question_text", "true_answer"},
-                null, null, null, null, null);
-        Cursor answerCursor = db.query(ExamDbSchema.ExamTable.TAB_NAME, new String[]{
-                "answer_id", "answer_text"},
-                null, null, null, null, null);
-        List<Option> options = new ArrayList<>();
-        questionCursor.moveToFirst();
-        answerCursor.moveToFirst();
-        while (questionCursor.isAfterLast()) {
-            options.add(new Option(
-                    answerCursor.getInt(answerCursor.getColumnIndex("answer_id")),
-                    answerCursor.getString(answerCursor.getColumnIndex("answer_text"))));
-            answerCursor.moveToNext();
-            questions.add(new Question(
-                    questionCursor.getInt(questionCursor.getColumnIndex("question_id")),
-                    questionCursor.getString(questionCursor.getColumnIndex("question_text")),
-                    options, questionCursor.getInt(questionCursor.getColumnIndex("question_id"))));
-            options.clear();
-        }
-        questionCursor.close();
-        answerCursor.close();                                   */
+        Intent intent = Objects.requireNonNull(getActivity()).getIntent();
+        this.id = intent.getIntExtra("id", 0);
+        this.db = new ExamBaseHelper(getContext()).getReadableDatabase();
         next.setOnClickListener(this::nextBtn);
         previous.setOnClickListener(this::prevButton);
-        Button menu = view.findViewById(R.id.toMenu);
-        menu.setOnClickListener(this::menuButton);
+        view.findViewById(R.id.toMenu).setOnClickListener(this::menuButton);
         variants.setOnCheckedChangeListener((group, checkedId) -> {
             RadioButton rb = group.findViewById(checkedId);
             next.setEnabled(rb != null && checkedId != -1);
@@ -124,6 +95,9 @@ public class MainFragment extends Fragment {
         hint.setOnClickListener(
                 v -> {
                     DialogFragment dialog = new ConfirmHintDialogFragment();
+
+                    intent.putExtra("id_for_hint", id);
+                    intent.putExtra("position_for_hint", position);
                     assert getFragmentManager() != null;
                     dialog.show(getFragmentManager(), "dialog_tag");
                 }
@@ -135,10 +109,55 @@ public class MainFragment extends Fragment {
             previous.setEnabled(savedInstanceState.getBoolean("previousState"));
             buttonsArray = savedInstanceState.getIntArray("radioButtons");
         }
-        Intent intent = getActivity().getIntent();
-        this.id = intent.getIntExtra("id", 0);
+        this.setStore();
         this.fillForm();
         return view;
+    }
+    private void setStore() {
+        store.clear();
+        Cursor cursor = db.query(ExamDbSchema.QuestionTable.TAB_NAME, null,
+                null, null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            if (cursor.getInt(cursor.getColumnIndex(
+                    ExamDbSchema.QuestionTable.Cols.FOREIGN_KEY)) == id) {
+                Question question = new Question(cursor.getInt(
+                        cursor.getColumnIndex(ExamDbSchema.QuestionTable.Cols.POSITION)),
+                        cursor.getString(cursor.getColumnIndex(
+                                ExamDbSchema.QuestionTable.Cols.QUESTION_TEXT)), this.setAnswers(
+                                        cursor.getInt(cursor.getColumnIndex("_id")),
+                        cursor.getInt(cursor.getColumnIndex(
+                                ExamDbSchema.QuestionTable.Cols.POSITION))),
+                        cursor.getInt(cursor.getColumnIndex(
+                                ExamDbSchema.QuestionTable.Cols.TRUE_ANSWER)));
+                store.add(question);
+            }
+            cursor.moveToNext();
+        }
+        cursor.close();
+    }
+    private List<Option> setAnswers(int id, int group) {
+        Cursor cursor = db.query(ExamDbSchema.AnswerTable.TAB_NAME, null,
+                null, null, null, null, null);
+        List<Option> result = new ArrayList<>();
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            if (cursor.getInt(cursor.getColumnIndex(
+                    ExamDbSchema.AnswerTable.Cols.FOREIGN_KEY)) == id
+                    && cursor.getInt(cursor.getColumnIndex(
+                            ExamDbSchema.AnswerTable.Cols.POSITION)) == group) {
+                Option option = new Option(cursor.getInt(cursor.getColumnIndex(
+                        ExamDbSchema.AnswerTable.Cols.ANSWER_ID)),
+                        cursor.getString(cursor.getColumnIndex(
+                                ExamDbSchema.AnswerTable.Cols.ANSWER_TEXT)),
+                        cursor.getInt(cursor.getColumnIndex(
+                                ExamDbSchema.AnswerTable.Cols.POSITION)));
+                result.add(option);
+            }
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return result;
     }
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -165,6 +184,7 @@ public class MainFragment extends Fragment {
         Question question = store.get(position);
         int id = this.variants.getCheckedRadioButtonId();
         Option option = question.getOptions().get(id - 1);
+        buttonsArray = new int[store.size()];
         this.buttonsArray[position] = option.getId();
     }
     private void restoreButtons() {
@@ -173,8 +193,8 @@ public class MainFragment extends Fragment {
     private void showAnswer() {
         int id = variants.getCheckedRadioButtonId();
         Question question = store.get(position);
-        Toast.makeText(getActivity(), "Your answer is " + id
-                        + ", correct is " + question.getAnswer(),
+        Toast.makeText(getActivity(), getString(R.string.your_answer_string) + id
+                        + getString(R.string.correct_is) + question.getAnswer(),
                 Toast.LENGTH_SHORT).show();
     }
     private void fillStatistic() {

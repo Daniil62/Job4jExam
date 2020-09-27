@@ -30,7 +30,7 @@ public class ExamUpdateFragment extends Fragment {
         view.findViewById(R.id.exam_update_form_button_ok).setOnClickListener(v -> {
             ContentValues values = new ContentValues();
             values.put(ExamDbSchema.ExamTable.Cols.TITLE, et.getText().toString());
-            store.update(ExamDbSchema.ExamTable.TAB_NAME, values, "id = ?",
+            store.update(ExamDbSchema.ExamTable.TAB_NAME, values, "_id = ?",
                     new String[] {String.valueOf(bundle.getInt("id"))
             });
             FragmentManager fm = Objects.requireNonNull(getActivity()).getSupportFragmentManager();

@@ -50,7 +50,7 @@ public class ExamListFragment extends Fragment {
                 null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            exams.add(new Exam(cursor.getInt(cursor.getColumnIndex("id")),
+            exams.add(new Exam(cursor.getInt(cursor.getColumnIndex("_id")),
                     cursor.getString(cursor.getColumnIndex("exam_name")),
                     cursor.getLong(cursor.getColumnIndex("exam_date")),
                     cursor.getFloat(cursor.getColumnIndex("exam_result")),
@@ -102,8 +102,8 @@ public class ExamListFragment extends Fragment {
                 exam.setMark(isChecked);
                 ContentValues values = new ContentValues();
                 values.put(ExamDbSchema.ExamTable.Cols.MARK, isChecked);
-                store.update(ExamDbSchema.ExamTable.TAB_NAME, values, "id = "
-                        + exam.getId(), new String[]{});
+                store.update(ExamDbSchema.ExamTable.TAB_NAME, values, "_id = "
+                        + (exam.getId()), new String[]{});
             });
             holder.view.findViewById(R.id.exam_edit_button).setOnClickListener(v -> {
                 FragmentManager fm = Objects.requireNonNull(getActivity())
@@ -142,7 +142,7 @@ public class ExamListFragment extends Fragment {
         }
         private void onExamClick(Exam exam) {
             Toast.makeText(
-                    getContext(), "You select " + exam.getName(),
+                    getContext(), getString(R.string.you_select) + exam.getName(),
                     Toast.LENGTH_SHORT
             ).show();
             Intent intent = new Intent(getActivity(), MainActivator.class);

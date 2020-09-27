@@ -32,15 +32,20 @@ public class ExamListActivity extends AppCompatActivity implements DialogExamsDe
     public void positiveExamsDeleteClick(DialogExamsDelete ded) {
         Cursor cursor = this.store.query(ExamDbSchema.ExamTable.TAB_NAME, null,
                 null, null, null, null, null);
+        Cursor cursor2 = this.store.query(ExamDbSchema.QuestionTable.TAB_NAME, null,
+                null, null, null, null, null);
         cursor.moveToFirst();
+        cursor2.moveToFirst();
         while (!cursor.isAfterLast()) {
             if (cursor.getInt(cursor.getColumnIndex("exam_mark")) != 0) {
-                store.delete(ExamDbSchema.ExamTable.TAB_NAME, "id = "
-                        + cursor.getInt(cursor.getColumnIndex("id")), new String[]{});
+                store.delete(ExamDbSchema.ExamTable.TAB_NAME, "_id = "
+                        + cursor.getInt(cursor.getColumnIndex("_id")), new String[]{});
             }
             cursor.moveToNext();
+            cursor2.moveToNext();
         }
         cursor.close();
+        cursor2.close();
         FragmentManager manager = this.getSupportFragmentManager();
         manager.beginTransaction().replace(R.id.list_exams, new ExamListFragment())
                 .addToBackStack(null).commit();

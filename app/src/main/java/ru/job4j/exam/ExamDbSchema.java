@@ -17,6 +17,7 @@ class ExamDbSchema {
             static final String POSITION = "question_id";
             static final String QUESTION_TEXT = "question_text";
             static final String TRUE_ANSWER = "true_answer";
+            static final String FOREIGN_KEY = "questions_f_key";
         }
     }
     static final class AnswerTable {
@@ -24,6 +25,8 @@ class ExamDbSchema {
         static final class Cols {
             static final String ANSWER_ID = "answer_id";
             static final String ANSWER_TEXT = "answer_text";
+            static final String POSITION = "position";
+            static final String FOREIGN_KEY = "answers_f_key";
         }
     }
 }

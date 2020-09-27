@@ -16,14 +16,14 @@ import android.widget.Button;
 import android.widget.TextView;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
-import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
 public class ResultFragment extends Fragment {
     private StringBuilder sb = new StringBuilder();
     private StatisticStore statStore = new StatisticStore();
-    private final QuestionStore qStore = QuestionStore.getInstance();
+    private final List<Question> qStore = MainFragment.getStore();
     private int size = statStore.getStatistic().size();
     private SQLiteDatabase db;
     private int index;
@@ -44,15 +44,6 @@ public class ResultFragment extends Fragment {
         startActivity(intent);
         Objects.requireNonNull(getActivity()).finish();
     }
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("examId", exam.getId());
-        outState.putString("examName", exam.getName());
-        outState.putLong("examTime", exam.getTime());
-        outState.putFloat("examResult", exam.getResult());
-        outState.putBoolean("examMark", exam.isMark());
-    }
     @SuppressLint("SimpleDateFormat")
     @Nullable
     @Override
@@ -68,14 +59,15 @@ public class ResultFragment extends Fragment {
         Button again = view.findViewById(R.id.try_again);
         again.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), MainActivator.class);
+            intent.putExtra("id", id);
             Objects.requireNonNull(getActivity()).startActivity(intent);
             statStore.clear();
         });
         index = 0;
         for (int i = 0; i < size; i++) {
-            sb.append(qStore.get(i).getText() + "\n" + "Your answer: "
-                    + statStore.getUserAnswer(i) + "\t" + "True answer: "
-                    + statStore.getTrueAnswer(i) + "\n\n");
+            sb.append(qStore.get(i).getText()).append("\n").append("Your answer: ")
+                    .append(statStore.getUserAnswer(i)).append("\t").append("True answer: ")
+                    .append(statStore.getTrueAnswer(i)).append("\n\n");
             textAnswers.setText(sb);
             if (statStore.getUserAnswer(i) == statStore.getTrueAnswer(i)) {
                 index++;
@@ -103,11 +95,11 @@ public class ResultFragment extends Fragment {
         ContentValues values = new ContentValues();
         Date date = new Date();
         values.put(ExamDbSchema.ExamTable.Cols.TIME, date.getTime());
-        db.update(ExamDbSchema.ExamTable.TAB_NAME, values, "id = " + id, new String[]{});
+        db.update(ExamDbSchema.ExamTable.TAB_NAME, values, "_id = " + id, new String[]{});
     }
     private void setExamResult(int id) {
         ContentValues values = new ContentValues();
         values.put(ExamDbSchema.ExamTable.Cols.RESULT, index / (size * 0.01));
-        db.update(ExamDbSchema.ExamTable.TAB_NAME, values, "id = " + id, new String[]{});
+        db.update(ExamDbSchema.ExamTable.TAB_NAME, values, "_id = " + id, new String[]{});
     }
 }

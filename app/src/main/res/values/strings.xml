@@ -1,29 +1,5 @@
 <resources>
-    <string name="app_name">Job4j Exam</string>
-    <string name="domain_prompt">Выберите область</string>
-    <string name="exp_date">Дата проведения испытания</string>
-    <string name="область">Область</string>
-    <string name="имяОбъекта">Имя объекта</string>
-    <string name="имяОб">имя объекта</string>
-    <string name="адрес">Адрес</string>
-    <string name="улицаДом">улица, дом</string>
-    <string name="фио">Ф.И.О.</string>
-    <string name="фиоЗаказчика">ф.и.о. заказчика</string>
-    <string name="температура">Температура</string>
-    <string name="емператураВоздуха">температура воздуха</string>
-    <string name="влажность">Влажность</string>
-    <string name="влажностьВозд">влажность воздуха</string>
-    <string name="давление">Давление</string>
-    <string name="атмДавление">атмосферное давление</string>
-    <string name="отчет">№ отчета</string>
-    <string name="номерОтчета">номер отчета</string>
-    <string name="назад">НАЗАД</string>
-    <string name="далее">ДАЛЕЕ</string>
-    <string-array name="domain_arrays">
-        <item>Московская</item>
-        <item>СПб</item>
-        <item>Рязанская</item>
-    </string-array>
+    <string name="app_name">Экзамен</string>
     <string name="question">Вопрос</string>
     <string name="radiobutton">RadioButton</string>
     <string name="next">ВПЕРЕД</string>
@@ -34,7 +10,6 @@
     <string name="result">Результат</string>
     <string name="answers">Ответы</string>
     <string name="finish">Result</string>
-    <string name="toMenu"><![CDATA[<]]></string>
     <string name="menu">Меню</string>
     <string name="info">Информация</string>
     <string name="date">Дата</string>
@@ -46,8 +21,20 @@
     <string name="all_items_deleted">Список пуст.</string>
     <string name="new_item_added">Добавлена новая позиция.</string>
     <string name="set_date">Задать дату</string>
+    <string name="add_exam_title_string">Добавление экзамена</string>
+    <string name="exam_name_string">Название экзамена</string>
+    <string name="question_text_string">Текст вопроса</string>
+    <string name="answer_variant_string">Вариант ответа</string>
+    <string name="true_answer_position_string">Правильный ответ:</string>
+    <string name="add_button_text">Добавить</string>
+    <string name="save_button_text">Сохранить</string>
+    <string name="edit_exam_title_string">Редактирование</string>
+    <string name="complete_button_text">Готово</string>
+    <string name="you_select">Вы выбрали\t</string>
+    <string name="your_answer_string">Ваш ответ\t</string>
+    <string name="correct_is">, правильный\t</string>
     <string-array name="numbers">
-        <item></item>
+        <item />
         <item>1</item>
         <item>2</item>
         <item>3</item>

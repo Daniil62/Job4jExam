@@ -10,26 +10,33 @@ public class ExamBaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + ExamDbSchema.ExamTable.TAB_NAME
-                + " (" + "id integer primary key autoincrement, "
-                + "exam_id integer " + ExamDbSchema.ExamTable.Cols.INDEX + ", "
-                + "exam_name text " + ExamDbSchema.ExamTable.Cols.TITLE + ", "
-                + "exam_date integer " + ExamDbSchema.ExamTable.Cols.TIME + ", "
-                + "exam_result real " + ExamDbSchema.ExamTable.Cols.RESULT + ", "
-                + "exam_mark integer " + ExamDbSchema.ExamTable.Cols.MARK
-                + ");");
+                + " (" + "_id integer primary key autoincrement, "
+                + ExamDbSchema.ExamTable.Cols.INDEX + " integer, "
+                + ExamDbSchema.ExamTable.Cols.TITLE + " text, "
+                + ExamDbSchema.ExamTable.Cols.TIME + " integer, "
+                + ExamDbSchema.ExamTable.Cols.RESULT + " real, "
+                + ExamDbSchema.ExamTable.Cols.MARK + " integer "
+                + ")");
         db.execSQL("create table " + ExamDbSchema.QuestionTable.TAB_NAME
-                + " (" + "id integer primary key autoincrement, "
-                + "question_id integer " + ExamDbSchema.QuestionTable.Cols.POSITION + ", "
-                + "question_text " + ExamDbSchema.QuestionTable.Cols.QUESTION_TEXT + ", "
-                + "true_answer integer " + ExamDbSchema.QuestionTable.Cols.TRUE_ANSWER + ", "
-                + "question_id integer reference " + ExamDbSchema.ExamTable.TAB_NAME + "(id)"
-                + ");");
+                + " (" + "_id integer primary key autoincrement, "
+                + ExamDbSchema.QuestionTable.Cols.POSITION + " integer, "
+                + ExamDbSchema.QuestionTable.Cols.QUESTION_TEXT + " text, "
+                + ExamDbSchema.QuestionTable.Cols.TRUE_ANSWER + " integer, "
+                + "questions_f_key integer, "
+                + "foreign key " + "(" + ExamDbSchema.QuestionTable.Cols.FOREIGN_KEY + ")"
+                + " references " + ExamDbSchema.ExamTable.TAB_NAME + "(_id)"
+                + " on delete cascade"
+                + ")");
         db.execSQL("create table " + ExamDbSchema.AnswerTable.TAB_NAME
-                + " (" + "id integer primary key autoincrement, "
-                + "answer_id integer " + ExamDbSchema.AnswerTable.Cols.ANSWER_ID + ", "
-                + "answer_text text " + ExamDbSchema.AnswerTable.Cols.ANSWER_TEXT + ", "
-                + "answer_id integer reference " + ExamDbSchema.QuestionTable.TAB_NAME + "(id)"
-                + ");");
+                + " (" + "_id integer primary key autoincrement, "
+                + ExamDbSchema.AnswerTable.Cols.ANSWER_ID + " integer, "
+                + ExamDbSchema.AnswerTable.Cols.ANSWER_TEXT + " text, "
+                + ExamDbSchema.AnswerTable.Cols.POSITION + " integer, "
+                + ExamDbSchema.AnswerTable.Cols.FOREIGN_KEY + ", "
+                + "foreign key " + "(" + ExamDbSchema.AnswerTable.Cols.FOREIGN_KEY + ")"
+                + " references " + ExamDbSchema.QuestionTable.TAB_NAME + "(_id)"
+                + " on delete cascade"
+                + ")");
     }
     ExamBaseHelper(Context context) {
         super (context, DB, null, VERSION);
