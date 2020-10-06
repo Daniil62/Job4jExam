@@ -20,10 +20,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+
+import ru.job4j.exam.store.QuestionStore;
 
 public class ExamAddFragment extends Fragment {
     private SQLiteDatabase store;
@@ -34,14 +33,14 @@ public class ExamAddFragment extends Fragment {
     private ImageButton addAnswer;
     private Button addQuestionBlock;
     private Button save;
-    private TextView variantsComplectation;
+    private TextView variantsComplete;
+    private QuestionStore qs;
     private int count;
     private int group;
     private int position;
     private int trueAnswerId;
     private boolean isComplete;
-    private List<Option> options;
-    private List<Question> questions;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -54,16 +53,16 @@ public class ExamAddFragment extends Fragment {
         this.spinner = view.findViewById(R.id.add_exam_spinner);
         this.addAnswer = view.findViewById(R.id.add_exam_add_answer_button);
         this.addQuestionBlock = view.findViewById(R.id.add_exam_add_question_block_button);
-        this.variantsComplectation = view.findViewById(R.id.add_exam_count_variants_textView);
+        this.variantsComplete = view.findViewById(R.id.add_exam_count_variants_textView);
         this.save = view.findViewById(R.id.add_exam_button_save);
         Button cancel = view.findViewById(R.id.add_exam_cancel_button);
+        this.qs = new QuestionStore();
         this.position = 0;
         this.count = 0;
         this.group = 4;
         this.trueAnswerId = 0;
         this.isComplete = false;
-        this.options = new ArrayList<>();
-        this.questions = new ArrayList<>();
+
         questionText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -103,34 +102,34 @@ public class ExamAddFragment extends Fragment {
         addAnswer.setEnabled(!answerVariant.getText().toString().equals(""));
         addAnswer.setOnClickListener(this::addAnswerClick);
         addQuestionBlock.setEnabled(count == 4 && spinner.getSelectedItemPosition() != 0);
-        addQuestionBlock.setOnClickListener(this::addQuestionBlockClick);
+        addQuestionBlock.setOnClickListener(v -> addQuestionBlockClick());
         save.setEnabled(isComplete);
-        save.setOnClickListener(this::buttonSaveClick);
-        cancel.setOnClickListener(this::cancelClick);
+        save.setOnClickListener(v -> buttonSaveClick());
+        cancel.setOnClickListener(v -> cancelClick());
         return view;
     }
     @SuppressLint("SetTextI18n")
     private void setCount(int c) {
-        this.variantsComplectation.setText(c + "/4");
+        this.variantsComplete.setText(c + "/4");
     }
     private void addAnswerClick(View view) {
         ++count;
         addQuestionBlock.setEnabled(count == 4 && spinner.getSelectedItemPosition() != 0);
         answerVariant.setEnabled(count != 4);
         if (count <= 4) {
-            options.add(new Option(count, answerVariant.getText().toString(), position));
+            qs.addAnswer(new Option(count, answerVariant.getText().toString(), position));
         } else {
             view.findViewById(R.id.add_exam_add_answer_button).setEnabled(false);
         }
         setCount(count);
         answerVariant.setText("");
     }
-    private void addQuestionBlockClick(View view) {
+    private void addQuestionBlockClick() {
         Question question = new Question(
-                position, questionText.getText().toString(), options, 0);
+                position, questionText.getText().toString(), qs.getAnswers(), 0);
         if (trueAnswerId != 0) {
             question.setAnswer(trueAnswerId);
-            questions.add(question);
+            qs.addQuestion(question);
         }
         isComplete = true;
         ++position;
@@ -141,7 +140,7 @@ public class ExamAddFragment extends Fragment {
         questionText.requestFocus();
         save.setEnabled(true);
     }
-    private void buttonSaveClick(View view) {
+    private void buttonSaveClick() {
         ContentValues values = new ContentValues();
         values.put(ExamDbSchema.ExamTable.Cols.TITLE, examName.getText().toString());
         values.put(ExamDbSchema.ExamTable.Cols.MARK, 0);
@@ -151,7 +150,7 @@ public class ExamAddFragment extends Fragment {
                 null, null, null, null, null);
         cursor.moveToLast();
         int idOfExam = cursor.getInt(cursor.getColumnIndex("_id"));
-        for (Question q : questions) {
+        for (Question q : qs.getQuestions()) {
             String s = q.getText();
             if (!s.equals("")) {
                 values.put(ExamDbSchema.QuestionTable.Cols.FOREIGN_KEY, idOfExam);
@@ -167,9 +166,9 @@ public class ExamAddFragment extends Fragment {
     }
     private void setAnswersTable(Question question) {
         ContentValues values = new ContentValues();
-        int size = options.size();
-        Cursor cursor = store.query(ExamDbSchema.QuestionTable.TAB_NAME, null, null,
-                null, null, null, null);
+        int size = qs.answersSize();
+        Cursor cursor = store.query(ExamDbSchema.QuestionTable.TAB_NAME, null,
+                null, null, null, null, null);
         cursor.moveToLast();
         int idOfQuestions = cursor.getInt(cursor.getColumnIndex("_id"));
         values.clear();
@@ -193,9 +192,9 @@ public class ExamAddFragment extends Fragment {
         manager.beginTransaction().replace(R.id.list_exams, new ExamListFragment())
                 .addToBackStack(null).commit();
     }
-    private void cancelClick(View view) {
-        options.clear();
-        questions.clear();
+    private void cancelClick() {
+        qs.answersClear();
+        qs.questionsClear();
         FragmentManager manager = Objects.requireNonNull(getActivity())
                 .getSupportFragmentManager();
         manager.beginTransaction().replace(R.id.list_exams, new ExamListFragment())

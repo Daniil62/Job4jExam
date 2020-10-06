@@ -1,44 +1,38 @@
 package ru.job4j.exam.store;
+
 import ru.job4j.exam.Option;
 import ru.job4j.exam.Question;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public final class QuestionStore {
-    private List<Question> questions = new ArrayList<Question>();
-    private static final QuestionStore INST = new QuestionStore();
-    private static final Map<Integer, String> answers = new HashMap<>();
-
-    private QuestionStore() {
-        questions.add(new Question(1, "How many primitive variables does Java have?",
-                Arrays.asList(new Option(1, "1.1"), new Option(2, "1.2"),
-                        new Option(3, "1.3"), new Option(4, "1.4")), 4));
-        questions.add(new Question(2, "What is Java Virtual Machine?",
-                Arrays.asList(new Option(1, "2.1"), new Option(2, "2.2"),
-                        new Option(3, "2.3"), new Option(4, "2.4")), 4));
-        questions.add(new Question(3, "What is happen if we try unboxing null?",
-                Arrays.asList(new Option(1, "3.1"), new Option(2, "3.2"),
-                        new Option(3, "3.3"), new Option(4, "3.4")), 4));
-    }
-    public static QuestionStore getInstance() {
-        return INST;
-    }
-
-    public void add(Question question) {
+public class QuestionStore {
+    private static List<Question> questions = new ArrayList<>();
+    private List<Option> answers = new ArrayList<>();
+    public void addQuestion(Question question) {
         questions.add(question);
     }
-
-    public Question get(int position) {
+    public List<Question> getQuestions() {
+        return questions;
+    }
+    public Question getQuestion(int position) {
         return questions.get(position);
     }
-
-    public int size() {
+    public void questionsClear() {
+        questions.clear();
+    }
+    public int questionsSize() {
         return questions.size();
     }
-    public Map<Integer, String> getAnswers() {
+    public void addAnswer(Option option) {
+        answers.add(option);
+    }
+    public List<Option> getAnswers() {
         return answers;
+    }
+    public int answersSize() {
+        return answers.size();
+    }
+    public void answersClear() {
+        answers.clear();
     }
 }

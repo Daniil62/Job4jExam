@@ -18,32 +18,31 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
 public class MainFragment extends Fragment {
+    private QuestionStore qs;
     private SQLiteDatabase db;
-    private static List<Question> store = new ArrayList<>();
-    public static List<Question> getStore() {
-        return store;
-    }
     private StatisticStore statStore = new StatisticStore();
     private int position = 0;
     private int id;
-    private int[] buttonsArray = new int[store.size()];
+    private int[] buttonsArray = new int[]{};
     private TextView text;
     private RadioGroup variants;
     private Button next;
     private Button previous;
-    private void nextBtn(View view) {
+    private void nextBtn() {
         fillStatistic();
         showAnswer();
-        if (position < store.size() - 1) {
+        if (position < qs.questionsSize() - 1) {
             this.saveButtons();
             position++;
             this.variants.clearCheck();
             fillForm();
         }
-        else if (position == store.size() - 1) {
+        else if (position == qs.questionsSize() - 1) {
             showAnswer();
             Intent intent = new Intent(getActivity(),
                     ResultActivator.class);
@@ -52,7 +51,7 @@ public class MainFragment extends Fragment {
             Objects.requireNonNull(getActivity()).finish();
         }
     }
-    private void prevButton(View view) {
+    private void prevButton() {
         this.variants.clearCheck();
         position--;
         this.restoreButtons();
@@ -60,7 +59,7 @@ public class MainFragment extends Fragment {
         fillForm();
         next.setEnabled(true);
     }
-    private void menuButton(View view) {
+    private void menuButton() {
         statStore.clear();
         Intent intent = new Intent(getActivity(), ExamListActivity.class);
         startActivity(intent);
@@ -84,9 +83,10 @@ public class MainFragment extends Fragment {
         Intent intent = Objects.requireNonNull(getActivity()).getIntent();
         this.id = intent.getIntExtra("id", 0);
         this.db = new ExamBaseHelper(getContext()).getReadableDatabase();
-        next.setOnClickListener(this::nextBtn);
-        previous.setOnClickListener(this::prevButton);
-        view.findViewById(R.id.toMenu).setOnClickListener(this::menuButton);
+        this.qs = new QuestionStore();
+        next.setOnClickListener(v -> nextBtn());
+        previous.setOnClickListener(v -> prevButton());
+        view.findViewById(R.id.toMenu).setOnClickListener(v -> menuButton());
         variants.setOnCheckedChangeListener((group, checkedId) -> {
             RadioButton rb = group.findViewById(checkedId);
             next.setEnabled(rb != null && checkedId != -1);
@@ -114,7 +114,7 @@ public class MainFragment extends Fragment {
         return view;
     }
     private void setStore() {
-        store.clear();
+        qs.questionsClear();
         Cursor cursor = db.query(ExamDbSchema.QuestionTable.TAB_NAME, null,
                 null, null, null, null, null);
         cursor.moveToFirst();
@@ -130,7 +130,7 @@ public class MainFragment extends Fragment {
                                 ExamDbSchema.QuestionTable.Cols.POSITION))),
                         cursor.getInt(cursor.getColumnIndex(
                                 ExamDbSchema.QuestionTable.Cols.TRUE_ANSWER)));
-                store.add(question);
+                qs.addQuestion(question);
             }
             cursor.moveToNext();
         }
@@ -171,7 +171,7 @@ public class MainFragment extends Fragment {
     private void fillForm() {
         this.next.setEnabled(variants.isSelected());
         this.previous.setEnabled(position != 0);
-        Question question = store.get(position);
+        Question question = qs.getQuestion(position);
         this.text.setText(question.getText());
         for (int i = 0; i < variants.getChildCount(); i++) {
             RadioButton button = (RadioButton) variants.getChildAt(i);
@@ -181,10 +181,10 @@ public class MainFragment extends Fragment {
         }
     }
     private void saveButtons() {
-        Question question = store.get(position);
+        Question question = qs.getQuestion(position);
         int id = this.variants.getCheckedRadioButtonId();
         Option option = question.getOptions().get(id - 1);
-        buttonsArray = new int[store.size()];
+        buttonsArray = new int[qs.questionsSize()];
         this.buttonsArray[position] = option.getId();
     }
     private void restoreButtons() {
@@ -192,13 +192,13 @@ public class MainFragment extends Fragment {
     }
     private void showAnswer() {
         int id = variants.getCheckedRadioButtonId();
-        Question question = store.get(position);
+        Question question = qs.getQuestion(position);
         Toast.makeText(getActivity(), getString(R.string.your_answer_string) + id
                         + getString(R.string.correct_is) + question.getAnswer(),
                 Toast.LENGTH_SHORT).show();
     }
     private void fillStatistic() {
-        Question question = store.get(position);
+        Question question = qs.getQuestion(position);
         int id = this.variants.getCheckedRadioButtonId();
         statStore.add(new Statistic(id, question.getAnswer()));
     }

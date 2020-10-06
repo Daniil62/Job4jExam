@@ -16,14 +16,14 @@ import android.widget.Button;
 import android.widget.TextView;
 import java.text.MessageFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
+
+import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
 public class ResultFragment extends Fragment {
     private StringBuilder sb = new StringBuilder();
     private StatisticStore statStore = new StatisticStore();
-    private final List<Question> qStore = MainFragment.getStore();
     private int size = statStore.getStatistic().size();
     private SQLiteDatabase db;
     private int index;
@@ -38,7 +38,7 @@ public class ResultFragment extends Fragment {
         result.setArguments(bundle);
         return result;
     }
-    private void menuButton(View view) {
+    private void menuButton() {
         statStore.clear();
         Intent intent = new Intent(getActivity(), ExamListActivity.class);
         startActivity(intent);
@@ -52,10 +52,11 @@ public class ResultFragment extends Fragment {
         View view = inflater.inflate(R.layout.result_activity, container, false);
         this.db = new ExamBaseHelper(getContext()).getWritableDatabase();
         int id = Objects.requireNonNull(getActivity()).getIntent().getIntExtra("id", 0);
+        QuestionStore qs = new QuestionStore();
         TextView textAnswers = view.findViewById(R.id.textAnswers);
         TextView textScore = view.findViewById(R.id.textScore);
         Button menu = view.findViewById(R.id.toMenu);
-        menu.setOnClickListener(this::menuButton);
+        menu.setOnClickListener(v -> menuButton());
         Button again = view.findViewById(R.id.try_again);
         again.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), MainActivator.class);
@@ -65,7 +66,7 @@ public class ResultFragment extends Fragment {
         });
         index = 0;
         for (int i = 0; i < size; i++) {
-            sb.append(qStore.get(i).getText()).append("\n").append("Your answer: ")
+            sb.append(qs.getQuestion(i).getText()).append("\n").append("Your answer: ")
                     .append(statStore.getUserAnswer(i)).append("\t").append("True answer: ")
                     .append(statStore.getTrueAnswer(i)).append("\n\n");
             textAnswers.setText(sb);
