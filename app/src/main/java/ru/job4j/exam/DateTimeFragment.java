@@ -35,8 +35,6 @@ public class DateTimeFragment extends Fragment implements DatePickerDialog
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.date_time, container, false);
-        getActivity();
-        setRetainInstance(true);
         dateTimeText = view.findViewById(R.id.date_and_time);
         Button back = view.findViewById(R.id.date_time_button_back);
         Button set = view.findViewById(R.id.date_time_button_set);

@@ -1,7 +1,7 @@
 package ru.job4j.exam;
+
+import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,29 +16,39 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
 import ru.job4j.exam.store.QuestionStore;
 import ru.job4j.exam.store.StatisticStore;
 
 public class MainFragment extends Fragment {
     private QuestionStore qs;
-    private SQLiteDatabase db;
     private StatisticStore statStore = new StatisticStore();
     private int position = 0;
     private int id;
+    private ExamBaseHelper helper;
     private int[] buttonsArray = new int[]{};
+    private boolean[] radioButtonsStateArray = new boolean[]{};
     private TextView text;
     private RadioGroup variants;
     private Button next;
     private Button previous;
+    private Button hintButton;
+    private boolean isBack = false;
+    private int previousSelectedAnswerId;
     private void nextBtn() {
         fillStatistic();
         showAnswer();
+        hintButton.setEnabled(true);
+        variants.setEnabled(true);
         if (position < qs.questionsSize() - 1) {
             this.saveButtons();
             position++;
+            if (isBack) {
+                setPenaltyIfItSecondAttempt(variants.getCheckedRadioButtonId());
+                isBack = false;
+            }
             this.variants.clearCheck();
             fillForm();
         }
@@ -50,6 +60,55 @@ public class MainFragment extends Fragment {
             startActivity(intent);
             Objects.requireNonNull(getActivity()).finish();
         }
+        updateRadioButtons();
+    }
+    private void setPenaltyIfItSecondAttempt(int selectedVariantId) {
+        if (isBack) {
+            if (previousSelectedAnswerId != selectedVariantId) {
+                statStore.penaltyIncrease(1);
+            }
+        }
+    }
+    private void hintClick() {
+        DialogFragment dialog = new ConfirmHintDialogFragment();
+        assert getFragmentManager() != null;
+        dialog.setTargetFragment(this, 1);
+        dialog.show(getFragmentManager(), "dialog_tag");
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != Activity.RESULT_OK) {
+            switch (requestCode) {
+                case 1: {
+                    setHint();
+                    break;
+                }
+            }
+        }
+    }
+    public void setHint() {
+        deleteTwoIncorrectVariants(getTwoIncorrectAnswers(helper.getTrueAnswer(id, position) - 1));
+        hintButton.setEnabled(false);
+    }
+    private List<Integer> getTwoIncorrectAnswers(int correct) {
+        List<Integer> list = Arrays.asList(0, 1, 2, 3);
+        List<Integer> result = new ArrayList<>();
+        int random = (int) (Math.random() * 4);
+        for (int i = 0; i < list.size(); i++) {
+            if (i != correct && i != random) {
+                result.add(i);
+            }
+        }
+        return result;
+    }
+    private void deleteTwoIncorrectVariants(List<Integer> list) {
+        RadioButton button = (RadioButton) variants.getChildAt(list.get(0));
+        button.setChecked(false);
+        button.setEnabled(false);
+        button = (RadioButton) variants.getChildAt(list.get(1));
+        button.setChecked(false);
+        button.setEnabled(false);
     }
     private void prevButton() {
         this.variants.clearCheck();
@@ -58,18 +117,15 @@ public class MainFragment extends Fragment {
         statStore.remove(position);
         fillForm();
         next.setEnabled(true);
+        previous.setEnabled(false);
+        isBack = true;
+        previousSelectedAnswerId = variants.getCheckedRadioButtonId();
     }
     private void menuButton() {
         statStore.clear();
         Intent intent = new Intent(getActivity(), ExamListActivity.class);
         startActivity(intent);
-    }
-    public static MainFragment of(int value) {
-        MainFragment main = new MainFragment();
-        Bundle bundle = new Bundle();
-        bundle.putInt(MainActivity.MAIN_FOR, value);
-        main.setArguments(bundle);
-        return main;
+        Objects.requireNonNull(getActivity()).finish();
     }
     @Nullable
     @Override
@@ -82,8 +138,10 @@ public class MainFragment extends Fragment {
         this.variants = view.findViewById(R.id.variants);
         Intent intent = Objects.requireNonNull(getActivity()).getIntent();
         this.id = intent.getIntExtra("id", 0);
-        this.db = new ExamBaseHelper(getContext()).getReadableDatabase();
         this.qs = new QuestionStore();
+        this.helper = new ExamBaseHelper(getContext());
+        this.radioButtonsStateArray = new boolean[variants.getChildCount()];
+        this.hintButton = view.findViewById(R.id.hint);
         next.setOnClickListener(v -> nextBtn());
         previous.setOnClickListener(v -> prevButton());
         view.findViewById(R.id.toMenu).setOnClickListener(v -> menuButton());
@@ -91,23 +149,16 @@ public class MainFragment extends Fragment {
             RadioButton rb = group.findViewById(checkedId);
             next.setEnabled(rb != null && checkedId != -1);
         });
-        Button hint = view.findViewById(R.id.hint);
-        hint.setOnClickListener(
-                v -> {
-                    DialogFragment dialog = new ConfirmHintDialogFragment();
-
-                    intent.putExtra("id_for_hint", id);
-                    intent.putExtra("position_for_hint", position);
-                    assert getFragmentManager() != null;
-                    dialog.show(getFragmentManager(), "dialog_tag");
-                }
-        );
+        hintButton.setOnClickListener(v -> hintClick());
         if (savedInstanceState != null) {
             position = savedInstanceState.getInt("position");
             variants.check(savedInstanceState.getInt("checkedVariant"));
             next.setEnabled(savedInstanceState.getBoolean("buttonNextState"));
             previous.setEnabled(savedInstanceState.getBoolean("previousState"));
             buttonsArray = savedInstanceState.getIntArray("radioButtons");
+            hintButton.setEnabled(savedInstanceState.getBoolean("hintButtonState"));
+            radioButtonsStateArray = savedInstanceState.getBooleanArray("radioButtonsState");
+            restoreRadioButtonsState();
         }
         this.setStore();
         this.fillForm();
@@ -115,49 +166,7 @@ public class MainFragment extends Fragment {
     }
     private void setStore() {
         qs.questionsClear();
-        Cursor cursor = db.query(ExamDbSchema.QuestionTable.TAB_NAME, null,
-                null, null, null, null, null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            if (cursor.getInt(cursor.getColumnIndex(
-                    ExamDbSchema.QuestionTable.Cols.FOREIGN_KEY)) == id) {
-                Question question = new Question(cursor.getInt(
-                        cursor.getColumnIndex(ExamDbSchema.QuestionTable.Cols.POSITION)),
-                        cursor.getString(cursor.getColumnIndex(
-                                ExamDbSchema.QuestionTable.Cols.QUESTION_TEXT)), this.setAnswers(
-                                        cursor.getInt(cursor.getColumnIndex("_id")),
-                        cursor.getInt(cursor.getColumnIndex(
-                                ExamDbSchema.QuestionTable.Cols.POSITION))),
-                        cursor.getInt(cursor.getColumnIndex(
-                                ExamDbSchema.QuestionTable.Cols.TRUE_ANSWER)));
-                qs.addQuestion(question);
-            }
-            cursor.moveToNext();
-        }
-        cursor.close();
-    }
-    private List<Option> setAnswers(int id, int group) {
-        Cursor cursor = db.query(ExamDbSchema.AnswerTable.TAB_NAME, null,
-                null, null, null, null, null);
-        List<Option> result = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            if (cursor.getInt(cursor.getColumnIndex(
-                    ExamDbSchema.AnswerTable.Cols.FOREIGN_KEY)) == id
-                    && cursor.getInt(cursor.getColumnIndex(
-                            ExamDbSchema.AnswerTable.Cols.POSITION)) == group) {
-                Option option = new Option(cursor.getInt(cursor.getColumnIndex(
-                        ExamDbSchema.AnswerTable.Cols.ANSWER_ID)),
-                        cursor.getString(cursor.getColumnIndex(
-                                ExamDbSchema.AnswerTable.Cols.ANSWER_TEXT)),
-                        cursor.getInt(cursor.getColumnIndex(
-                                ExamDbSchema.AnswerTable.Cols.POSITION)));
-                result.add(option);
-            }
-            cursor.moveToNext();
-        }
-        cursor.close();
-        return result;
+        qs = helper.setQuestionStore(id);
     }
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -167,6 +176,27 @@ public class MainFragment extends Fragment {
         outState.putBoolean("buttonNextState", next.isEnabled());
         outState.putBoolean("previousState", previous.isActivated());
         outState.putIntArray("radioButtons", this.buttonsArray);
+        saveRadioButtonsState();
+        outState.putBooleanArray("radioButtonsState", this.radioButtonsStateArray);
+        outState.putBoolean("hintButtonState", hintButton.isEnabled());
+    }
+    private void saveRadioButtonsState() {
+        for (int i = 0; i < radioButtonsStateArray.length; i++) {
+            radioButtonsStateArray[i] = variants.getChildAt(i).isEnabled();
+        }
+    }
+    private void restoreRadioButtonsState() {
+        for (int i = 0; i < radioButtonsStateArray.length; i++) {
+            variants.getChildAt(i).setEnabled(radioButtonsStateArray[i]);
+        }
+    }
+    private void updateRadioButtons() {
+        for (int i = 0; i < variants.getChildCount(); i++) {
+            RadioButton rb = (RadioButton) variants.getChildAt(i);
+            if (!rb.isEnabled()) {
+                rb.setEnabled(true);
+            }
+        }
     }
     private void fillForm() {
         this.next.setEnabled(variants.isSelected());

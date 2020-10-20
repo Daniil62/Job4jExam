@@ -1,31 +1,34 @@
 package ru.job4j.exam;
 
 import android.annotation.SuppressLint;
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import java.util.Objects;
-
 import ru.job4j.exam.store.QuestionStore;
 
 public class ExamAddFragment extends Fragment {
-    private SQLiteDatabase store;
+    private ExamBaseHelper helper;
     private EditText examName;
     private EditText questionText;
     private EditText answerVariant;
@@ -40,14 +43,15 @@ public class ExamAddFragment extends Fragment {
     private int position;
     private int trueAnswerId;
     private boolean isComplete;
-
+    private String description = "";
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.add_exam_form, container, false);
-        this.store = new ExamBaseHelper(getContext()).getWritableDatabase();
+        this.helper = new ExamBaseHelper(getContext());
         this.examName = view.findViewById(R.id.add_exam_editText);
+        LinearLayout addDescription = view.findViewById(R.id.add_exam_desc_layout);
         this.questionText = view.findViewById(R.id.add_exam_question_editText);
         this.answerVariant = view.findViewById(R.id.add_exam_answer_editText);
         this.spinner = view.findViewById(R.id.add_exam_spinner);
@@ -57,12 +61,14 @@ public class ExamAddFragment extends Fragment {
         this.save = view.findViewById(R.id.add_exam_button_save);
         Button cancel = view.findViewById(R.id.add_exam_cancel_button);
         this.qs = new QuestionStore();
+        qs.answersClear();
+        qs.questionsClear();
         this.position = 0;
         this.count = 0;
         this.group = 4;
         this.trueAnswerId = 0;
         this.isComplete = false;
-
+        addDescription.setOnClickListener(v -> onAddDescriptionClick());
         questionText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -106,7 +112,16 @@ public class ExamAddFragment extends Fragment {
         save.setEnabled(isComplete);
         save.setOnClickListener(v -> buttonSaveClick());
         cancel.setOnClickListener(v -> cancelClick());
+        setHasOptionsMenu(true);
         return view;
+    }
+    private void onAddDescriptionClick() {
+        Objects.requireNonNull(getActivity())
+                .getIntent().putExtra("description", description);
+        DialogFragment dialog = new AddDescriptionFormFragment();
+        assert getFragmentManager() != null;
+        dialog.setTargetFragment(this, 1);
+        dialog.show(getFragmentManager(), "dialog_tag");
     }
     @SuppressLint("SetTextI18n")
     private void setCount(int c) {
@@ -141,63 +156,56 @@ public class ExamAddFragment extends Fragment {
         save.setEnabled(true);
     }
     private void buttonSaveClick() {
-        ContentValues values = new ContentValues();
-        values.put(ExamDbSchema.ExamTable.Cols.TITLE, examName.getText().toString());
-        values.put(ExamDbSchema.ExamTable.Cols.MARK, 0);
-        store.insert(ExamDbSchema.ExamTable.TAB_NAME, null, values);
-        values.clear();
-        Cursor cursor = store.query(ExamDbSchema.ExamTable.TAB_NAME, null,
-                null, null, null, null, null);
-        cursor.moveToLast();
-        int idOfExam = cursor.getInt(cursor.getColumnIndex("_id"));
-        for (Question q : qs.getQuestions()) {
-            String s = q.getText();
-            if (!s.equals("")) {
-                values.put(ExamDbSchema.QuestionTable.Cols.FOREIGN_KEY, idOfExam);
-                values.put(ExamDbSchema.QuestionTable.Cols.QUESTION_TEXT, q.getText());
-                values.put(ExamDbSchema.QuestionTable.Cols.POSITION, q.getId());
-                values.put(ExamDbSchema.QuestionTable.Cols.TRUE_ANSWER, q.getAnswer());
-                store.insert(ExamDbSchema.QuestionTable.TAB_NAME, null, values);
-            }
-            cursor.close();
-            setAnswersTable(q);
-        }
+        qs.getExam().setName(examName.getText().toString());
+        qs.getExam().setDesc(description);
+        helper.buildExam(qs, group);
+        qs.answersClear();
+        qs.questionsClear();
         loadFragment();
     }
-    private void setAnswersTable(Question question) {
-        ContentValues values = new ContentValues();
-        int size = qs.answersSize();
-        Cursor cursor = store.query(ExamDbSchema.QuestionTable.TAB_NAME, null,
-                null, null, null, null, null);
-        cursor.moveToLast();
-        int idOfQuestions = cursor.getInt(cursor.getColumnIndex("_id"));
-        values.clear();
-        for ( ; count < group; count++) {
-            Option o = question.getOptions().get(count);
-            values.put(ExamDbSchema.AnswerTable.Cols.FOREIGN_KEY, idOfQuestions);
-            values.put(ExamDbSchema.AnswerTable.Cols.ANSWER_TEXT, o.getText());
-            values.put(ExamDbSchema.AnswerTable.Cols.POSITION, o.getGroup());
-            values.put(ExamDbSchema.AnswerTable.Cols.ANSWER_ID, o.getId());
-            store.insert(ExamDbSchema.AnswerTable.TAB_NAME, null, values);
-            values.clear();
-        }
-        cursor.close();
-        if (size > group) {
-            group += 4;
-        }
-    }
     private void loadFragment() {
-        FragmentManager manager = Objects.requireNonNull(getActivity())
-                .getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.list_exams, new ExamListFragment())
-                .addToBackStack(null).commit();
+        Intent intent = new Intent(getActivity(), ExamListActivity.class);
+        startActivity(intent);
+        Objects.requireNonNull(getActivity()).finish();
     }
     private void cancelClick() {
         qs.answersClear();
         qs.questionsClear();
-        FragmentManager manager = Objects.requireNonNull(getActivity())
-                .getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.list_exams, new ExamListFragment())
-                .addToBackStack(null).commit();
+        Objects.requireNonNull(getActivity()).onBackPressed();
+    }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.add_exam_form, menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_add_exam: {
+                Intent intent = new Intent(getActivity(), InnerExamsListActivity.class);
+                Toast.makeText(getActivity(),
+                        getString(R.string.select_a_completed_exam_from_this_list),
+                        Toast.LENGTH_SHORT).show();
+                startActivity(intent);
+                Objects.requireNonNull(getActivity()).finish();
+                return true;
+            }
+            default: {
+                return super.onOptionsItemSelected(item);
+            }
+        }
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != Activity.RESULT_OK) {
+            switch (requestCode) {
+                case 1: {
+                    this.description = Objects.requireNonNull(getActivity())
+                            .getIntent().getStringExtra("description");
+                    break;
+                }
+            }
+        }
     }
 }

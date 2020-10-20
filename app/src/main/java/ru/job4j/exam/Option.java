@@ -4,7 +4,7 @@ public class Option {
     private int id;
     private String text;
     private int group;
-    Option(int id, String text, int group) {
+    public Option(int id, String text, int group) {
         this.id = id;
         this.text = text;
         this.group = group;

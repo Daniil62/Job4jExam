@@ -5,21 +5,29 @@ import android.support.annotation.NonNull;
 public class Exam {
     private int id;
     private String name;
-    private long time;
+    private long date;
     private float result;
     private boolean mark;
-    Exam(int id, String name, long time, float result, boolean mark) {
+    private String desc;
+    private long time;
+    public Exam(int id, String name, long date, float result, boolean mark, String desc, long time) {
         this.id = id;
         this.name = name;
-        this.time = time;
+        this.date = date;
         this.result = result;
         this.mark = mark;
+        this.desc = desc;
+        this.time = time;
+    }
+    public Exam(){}
+    public void setName(String name) {
+        this.name = name;
     }
     String getName() {
         return name;
     }
-    long getTime() {
-        return time;
+    long getDate() {
+        return date;
     }
     float getResult() {
         return result;
@@ -40,6 +48,15 @@ public class Exam {
         Exam exam = (Exam) o;
         return id == exam.id;
     }
+    public String getDesc() {
+        return desc;
+    }
+    void setDesc(String desc) {
+        this.desc = desc;
+    }
+    long getTime() {
+        return time;
+    }
     @Override
     public int hashCode() {
         return id;
@@ -50,7 +67,7 @@ public class Exam {
         return "Exam{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", time=" + time +
+                ", date=" + date +
                 ", result=" + result +
                 '}';
     }

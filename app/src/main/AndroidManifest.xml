@@ -16,11 +16,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivator"/>
-            <activity android:name=".HintActivator"/>
-            <activity android:name=".ResultActivator"/>
+        <activity android:name=".MainActivity"
+            android:noHistory="true"/>
+        <activity android:name=".ResultActivator"/>
             <activity android:name=".DateTimeActivator"
                 android:screenOrientation="nosensor"/>
+        <activity android:name=".ExamAddActivity" />
+        <activity android:name=".InnerExamsListActivity" />
+        <activity android:name=".ExamDescriptionActivity" />
+        <activity android:name=".AddDescriptionFormActivity"
+            android:theme="@android:style/Theme.Holo.Dialog.NoActionBar.MinWidth"/>
+        <activity android:name=".AnswerDetailsActivity"
+            android:theme="@android:style/Theme.Holo.Dialog.NoActionBar.MinWidth"/>
     </application>
 
 </manifest>

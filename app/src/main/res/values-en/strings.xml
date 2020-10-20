@@ -15,6 +15,7 @@
     <string name="info">info</string>
     <string name="date">date</string>
     <string name="ok">OK</string>
+    <string name="no">NO</string>
     <string name="cancel">Cancel</string>
     <string name="add_item">Add</string>
     <string name="delete_items">Delete</string>
@@ -34,6 +35,21 @@
     <string name="you_select">You select\t</string>
     <string name="your_answer_string">Your answer is\t</string>
     <string name="correct_is">, correct is\t</string>
+    <string name="your_answer_result_string">your answer:\t</string>
+    <string name="true_answer_result_string">true answer:\t</string>
+    <string name="score_string">Score:</string>
+    <string name="penalty_point_string">Penalty point:\t</string>
+    <string name="confirm_hint_dialog_message">Remove two incorrect variants?</string>
+    <string name="start">Start</string>
+    <string name="exam">Exam \"</string>
+    <string name="added_to_te_list">\" added to the list</string>
+    <string name="add_exam_description">Add exam description</string>
+    <string name="exam_description_header">Exam description.</string>
+    <string name="create_new_exam">Create new exam.</string>
+    <string name="select_a_completed_exam_from_this_list">
+        Select a completed exam from this list</string>
+    <string name="stop_exam_and_back_to_menu">
+        Do you want to stop the exam and return to menu?</string>
     <string-array name="numbers">
         <item />
         <item>1</item>

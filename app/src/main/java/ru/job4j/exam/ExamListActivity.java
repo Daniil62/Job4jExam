@@ -1,7 +1,5 @@
 package ru.job4j.exam;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,36 +9,22 @@ import android.support.v7.app.AppCompatActivity;
 public class ExamListActivity extends AppCompatActivity implements DialogExamsDelete
         .ExamsDeleteDialogListener {
     private final FragmentManager manager = getSupportFragmentManager();
-    private SQLiteDatabase store;
+    private ExamBaseHelper helper;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.exams);
         Fragment fragment = manager.findFragmentById(R.id.list_exams);
-        this.store = new ExamBaseHelper(this).getWritableDatabase();
+        this.helper = new ExamBaseHelper(this);
         if (fragment == null) {
             fragment = new ExamListFragment();
-            manager.beginTransaction().add(R.id.list_exams, fragment).commit();
+            manager.beginTransaction().replace(R.id.list_exams, fragment)
+                    .addToBackStack(null).commit();
         }
-    }
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
     }
     @Override
     public void positiveExamsDeleteClick(DialogExamsDelete ded) {
-        Cursor cursor = this.store.query(ExamDbSchema.ExamTable.TAB_NAME, null,
-                null, null, null, null, null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            if (cursor.getInt(cursor.getColumnIndex("exam_mark")) != 0) {
-                store.delete(ExamDbSchema.ExamTable.TAB_NAME, "_id = "
-                        + cursor.getInt(cursor.getColumnIndex("_id")), new String[]{});
-            }
-            cursor.moveToNext();
-        }
-        cursor.close();
+        helper.deleteExam();
         FragmentManager manager = this.getSupportFragmentManager();
         manager.beginTransaction().replace(R.id.list_exams, new ExamListFragment())
                 .addToBackStack(null).commit();
@@ -50,5 +34,9 @@ public class ExamListActivity extends AppCompatActivity implements DialogExamsDe
         FragmentManager manager = this.getSupportFragmentManager();
         manager.beginTransaction().replace(R.id.list_exams, new ExamListFragment())
                 .addToBackStack(null).commit();
+    }
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 }

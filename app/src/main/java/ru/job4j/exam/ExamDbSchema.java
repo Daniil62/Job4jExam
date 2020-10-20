@@ -6,9 +6,11 @@ class ExamDbSchema {
         static final class Cols {
             static final String INDEX = "exam_id";
             static final String TITLE = "exam_name";
-            static final String TIME = "exam_date";
+            static final String DATE = "exam_date";
             static final String RESULT = "exam_result";
             static final String MARK = "exam_mark";
+            static final String DESC = "exam_desc";
+            static final String TIME_RESULT = "exam_time_result";
         }
     }
     static final class QuestionTable {
