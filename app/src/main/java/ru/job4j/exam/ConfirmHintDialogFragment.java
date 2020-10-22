@@ -27,9 +27,10 @@ public class ConfirmHintDialogFragment extends DialogFragment {
             callBack.positiveDialogClick(ConfirmHintDialogFragment.this);
             Intent intent = new Intent();
             intent.putExtra("value", 1);
-            assert getTargetFragment() != null;
-            getTargetFragment().onActivityResult(
-                    getTargetRequestCode(), Activity.RESULT_OK, intent);
+            if (getTargetFragment() != null) {
+                getTargetFragment().onActivityResult(
+                        getTargetRequestCode(), Activity.RESULT_OK, intent);
+            }
         }).setNegativeButton(R.string.cancel, (dialog, which) ->
                 callBack.negativeDialogClick(ConfirmHintDialogFragment.this)).create();
     }

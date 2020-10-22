@@ -115,7 +115,7 @@ public class ResultFragment extends Fragment {
             int userAnswerId = statisticStore.getUserAnswer(i);
             int trueAnswerId = statisticStore.getTrueAnswer(i);
             questionText.setText(question.getText());
-            String userAnswer = getString(R.string.your_answer_result_string) + + userAnswerId;
+            String userAnswer = getString(R.string.your_answer_result_string) + userAnswerId;
             String trueAnswer = " / " + getString(R.string.true_answer_result_string) + trueAnswerId;
             userAnswerTextView.setText(userAnswer);
             trueAnswerTextView.setText(trueAnswer);

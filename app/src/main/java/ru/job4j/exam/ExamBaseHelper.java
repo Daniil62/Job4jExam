@@ -218,4 +218,10 @@ public class ExamBaseHelper extends SQLiteOpenHelper implements StoreManager {
         }
         cursor.close();
     }
+    void renameExam(int id, String name) {
+        ContentValues values = new ContentValues();
+        values.put(ExamDbSchema.ExamTable.Cols.TITLE, name);
+        db.update(ExamDbSchema.ExamTable.TAB_NAME, values, "_id = ?",
+                new String[] {String.valueOf(id)});
+    }
 }

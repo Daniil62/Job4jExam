@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -29,16 +28,10 @@ public class AddDescriptionFormFragment extends DialogFragment {
         description = getActivity().getIntent().getStringExtra("description");
         descField.setText(description);
         descField.setSelection(descField.getText().length());
-        descField.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        descField.addTextChangedListener(new TextMaster() {
             @Override
             public void afterTextChanged(Editable s) {
-                if (!s.toString().equals("")) {
+                if (!s.toString().isEmpty()) {
                     description = s.toString();
                 }
             }
@@ -51,8 +44,9 @@ public class AddDescriptionFormFragment extends DialogFragment {
         Intent intent = Objects.requireNonNull(getActivity()).getIntent();
         intent.putExtra("value", 1);
         intent.putExtra("description", description);
-        assert getTargetFragment() != null;
-        getTargetFragment().onActivityResult(
-                getTargetRequestCode(), Activity.RESULT_OK, intent);
+        if (getTargetFragment() != null) {
+            getTargetFragment().onActivityResult(
+                    getTargetRequestCode(), Activity.RESULT_OK, intent);
+        }
     }
 }

@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -69,28 +68,16 @@ public class ExamAddFragment extends Fragment {
         this.trueAnswerId = 0;
         this.isComplete = false;
         addDescription.setOnClickListener(v -> onAddDescriptionClick());
-        questionText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        questionText.addTextChangedListener(new TextMaster() {
             @Override
             public void afterTextChanged(Editable s) {
                 save.setEnabled(false);
             }
         });
-        answerVariant.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        answerVariant.addTextChangedListener(new TextMaster() {
             @Override
             public void afterTextChanged(Editable s) {
-                addAnswer.setEnabled(!s.toString().equals(""));
+                addAnswer.setEnabled(!s.toString().isEmpty());
             }
         });
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -105,7 +92,7 @@ public class ExamAddFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-        addAnswer.setEnabled(!answerVariant.getText().toString().equals(""));
+        addAnswer.setEnabled(!answerVariant.getText().toString().isEmpty());
         addAnswer.setOnClickListener(this::addAnswerClick);
         addQuestionBlock.setEnabled(count == 4 && spinner.getSelectedItemPosition() != 0);
         addQuestionBlock.setOnClickListener(v -> addQuestionBlockClick());
