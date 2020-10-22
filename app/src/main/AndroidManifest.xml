@@ -28,6 +28,7 @@
             android:theme="@android:style/Theme.Holo.Dialog.NoActionBar.MinWidth"/>
         <activity android:name=".AnswerDetailsActivity"
             android:theme="@android:style/Theme.Holo.Dialog.NoActionBar.MinWidth"/>
+        <activity android:name=".ExamUpdateActivity" />
     </application>
 
 </manifest>

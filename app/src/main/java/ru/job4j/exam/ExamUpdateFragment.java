@@ -1,11 +1,11 @@
 package ru.job4j.exam;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,22 +25,23 @@ public class ExamUpdateFragment extends Fragment {
                 getActivity()).getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         final EditText et = view.findViewById(R.id.exam_update_form_editText);
+        Intent intent = getActivity().getIntent();
         ExamBaseHelper helper = new ExamBaseHelper(getContext());
         assert bundle != null;
-        et.setText(bundle.getString("name"));
+        et.setText(intent.getStringExtra("name"));
         et.setSelection(et.getText().length());
+        et.requestFocus();
         view.findViewById(R.id.exam_update_form_button_back).setOnClickListener(v -> turnBack());
         view.findViewById(R.id.exam_update_form_button_ok).setOnClickListener(v -> {
-            helper.renameExam(bundle.getInt("id"), et.getText().toString());
+            helper.renameExam(intent.getIntExtra("id", 0),
+                    et.getText().toString());
             turnBack();
         });
         return view;
     }
     private void turnBack() {
-        FragmentManager fm = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
-        imm.hideSoftInputFromWindow(getActivity()
+        imm.hideSoftInputFromWindow(Objects.requireNonNull(getActivity())
                 .getWindow().getDecorView().getWindowToken(), 0);
-        fm.beginTransaction().replace(R.id.list_exams, new ExamListFragment())
-                .addToBackStack(null).commit();
+        getActivity().onBackPressed();
     }
 }

@@ -10,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -92,7 +91,11 @@ public class ExamListFragment extends Fragment {
                         + (exam.getId()), new String[]{});
             });
             holder.view.findViewById(R.id.exam_edit_button).setOnClickListener(v -> {
-                FragmentManager fm = Objects.requireNonNull(getActivity())
+                Intent intent = new Intent(getActivity(), ExamUpdateActivity.class);
+                intent.putExtra("id", exam.getId());
+                intent.putExtra("name", exam.getName());
+                startActivity(intent);
+            /*    FragmentManager fm = Objects.requireNonNull(getActivity())
                         .getSupportFragmentManager();
                 Fragment fragment = new ExamUpdateFragment();
                 Bundle bundle = new Bundle();
@@ -100,7 +103,7 @@ public class ExamListFragment extends Fragment {
                 bundle.putString("name", exam.getName());
                 fragment.setArguments(bundle);
                 fm.beginTransaction().replace(R.id.list_exams, fragment)
-                        .addToBackStack(null).commit();
+                        .addToBackStack(null).commit();*/
             });
         }
         @Override
