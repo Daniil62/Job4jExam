@@ -42,6 +42,7 @@ public class ExamUpdateFragment extends Fragment {
     private void turnBack() {
         imm.hideSoftInputFromWindow(Objects.requireNonNull(getActivity())
                 .getWindow().getDecorView().getWindowToken(), 0);
-        getActivity().onBackPressed();
+        Intent intent = new Intent(getActivity(), ExamListActivity.class);
+        startActivity(intent);
     }
 }

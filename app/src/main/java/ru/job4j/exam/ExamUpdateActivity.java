@@ -15,8 +15,7 @@ public class ExamUpdateActivity extends AppCompatActivity {
         Fragment fragment = manager.findFragmentById(R.id.content);
         if (fragment == null) {
             fragment = new ExamUpdateFragment();
-            manager.beginTransaction()
-                    .add(R.id.content, fragment).commit();
+            manager.beginTransaction().add(R.id.content, fragment).commit();
         }
     }
 }
